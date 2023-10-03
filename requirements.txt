@@ -1,0 +1,7 @@
+numpy
+mne
+jupyterlab
+pandas
+matplotlib
+ipympl
+mne-connectivity
