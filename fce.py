@@ -4,10 +4,14 @@ from scipy import signal
 
 def functional_connectivity(data: np.ndarray, window_len: int) -> np.ndarray:
     """
-    Calculates a stream of functional connectivity matrices across the length of the signal.
+    Calculates functional connectivity matrices across the length of the signal.
 
     data (np.ndarray): matrix of shape (number of channels, time of the measurement)
     window_len (int): length of a sliding window
+
+    Returns
+    ---
+    FCs (np.ndarray):
     """
     # korelace mezi časovými řadami dvou senzorů - personův korelační koeficient
 

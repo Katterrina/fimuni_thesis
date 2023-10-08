@@ -6,3 +6,4 @@ matplotlib
 ipympl
 mne-connectivity
 scipy
+autoreject

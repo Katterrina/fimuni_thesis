@@ -1,5 +1,8 @@
 # Diplomka -- poznámky
 
+- chat: https://chat.ebrains.eu/home
+- uspořádní repozitáře: https://drivendata.github.io/cookiecutter-data-science/
+
 ## Mohlo by se hodit
 
 - úvod do EEG: https://www.ebme.co.uk/articles/clinical-engineering/introduction-to-eeg
