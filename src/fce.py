@@ -11,9 +11,9 @@ def functional_connectivity(data: np.ndarray, window_len: int) -> np.ndarray:
 
     Returns
     ---
-    FCs (np.ndarray):
+    FCs (np.ndarray): matrix of shape (time, number of channels, number of channels)
     """
-    # korelace mezi časovými řadami dvou senzorů - personův korelační koeficient
+    # korelace mezi časovými řadami dvou senzorů - Pearsonův korelační koeficient
 
     number_of_channels, time = data.shape
 
@@ -28,6 +28,15 @@ def functional_connectivity(data: np.ndarray, window_len: int) -> np.ndarray:
 
 
 def dynamic_functional_connectivity(FCs):
+    """
+    Calculates dynamic functional connectivity matrix from functional connectivity matrices.
+
+    FCs (np.ndarray): matrix of shape (time, number of channels, number of channels)
+
+    Returns
+    ---
+    dFCs (np.ndarray): matrix of shape (time, time)
+    """
     time = FCs.shape[0]
     
     dFC = np.empty((time,time))
@@ -39,7 +48,17 @@ def dynamic_functional_connectivity(FCs):
             dFC[t1,t2] = stats.pearsonr(FCs[t1][indices],FCs[t2][indices]).statistic
 
     return dFC
+
+def compute_fluidity(dFC,window_len,n_overlap=None):
+    if n_overlap is None:
+        n_overlap = window_len - 1
     
+    offset = n_overlap/(window_len-n_overlap) + 1
+    indices = np.triu_indices(dFC.shape[0],k=offset) 
+
+    fluidity = stats.variation(dFC[indices])
+
+    return fluidity    
 
 data = np.array([[1, 2, 2, 4, 8, 10], [3, 4, 5, 4, 8, 10], [5, 6, 1, 10, 14, 2]])
 time_window_length = 3
@@ -49,3 +68,6 @@ print(FCs)
 
 dFC = dynamic_functional_connectivity(FCs)
 print(dFC)
+
+fluidity = compute_fluidity(dFC,time_window_length,n_overlap=0)
+print(fluidity)
