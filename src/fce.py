@@ -27,7 +27,7 @@ def functional_connectivity(data: np.ndarray, window_len: int) -> np.ndarray:
     return FCs
 
 
-def dynamic_functional_connectivity(FCs):
+def dynamic_functional_connectivity(FCs: np.ndarray) -> np.ndarray:
     """
     Calculates dynamic functional connectivity matrix from functional connectivity matrices.
 
@@ -49,7 +49,7 @@ def dynamic_functional_connectivity(FCs):
 
     return dFC
 
-def compute_fluidity(dFC,window_len,n_overlap=None):
+def compute_fluidity(dFC: np.ndarray,window_len: int,n_overlap: int=None) -> float:
     if n_overlap is None:
         n_overlap = window_len - 1
     
@@ -58,7 +58,25 @@ def compute_fluidity(dFC,window_len,n_overlap=None):
 
     fluidity = stats.variation(dFC[indices])
 
-    return fluidity    
+    return fluidity 
+
+def bursting_potential(data: np.ndarray) -> np.ndarray:
+    """
+    Calculates bursting potential (Breyton).
+
+    data (np.ndarray): matrix of shape (number of channels, time of the measurement)
+
+    Returns
+    ---
+    TODO: seznam časů, kde je vysoký bursting potential
+    """    
+
+    zscored = stats.zscore(data,axis=1) 
+    
+    # TODO root-sum-square https://accendoreliability.com/root-sum-squared-tolerance-analysis-method/
+
+    return True
+
 
 data = np.array([[1, 2, 2, 4, 8, 10], [3, 4, 5, 4, 8, 10], [5, 6, 1, 10, 14, 2]])
 time_window_length = 3
@@ -71,3 +89,6 @@ print(dFC)
 
 fluidity = compute_fluidity(dFC,time_window_length,n_overlap=0)
 print(fluidity)
+
+bp = bursting_potential(data)
+print(bp)
