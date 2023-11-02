@@ -3,6 +3,25 @@
 - chat: https://chat.ebrains.eu/home
 - uspořádní repozitáře: https://drivendata.github.io/cookiecutter-data-science/
 
+## Termíny a formality
+
+- [kompletní pokyny pro diplomky na FI MUNI](https://www.fi.muni.cz/files/studijni/bp-dp-na-fi-v280423.pdf)
+    - pozor! na rozdíl od MFF UK doporučený (40) a minimální (30) počet normostran (normostrana ~1800 znaků)
+- [termíny na webu FI](https://www.fi.muni.cz/studies/master/dates.html.cs)
+    - **zadání** 18. 3. 2024 (už musí být kompletní a potvrzení v IS)
+        - přihlásit se k tématu musím už do 4. 3. 2024!
+    - **odevzdání** 20. 5. 2024
+    - uzavření studia 11. 6. 2024
+    - **státnice a obhajoby** od 17. 6. 2024 do 21. 6. 2024
+- související předměty
+    - SDIPR 20 kreditů, zapsat lze v dalším semestru vše naráz
+        - přihlásit se k tématu v IS
+    - SOBHA a SZMGR, zápis do 4. 3. 2024
+- [LaTeX šablona](https://external_relations.pages.fi.muni.cz/document_templates/fithesis/#fithesis)
+- příklad obhájené práce z FI MUNI: <https://is.muni.cz/th/olo1j/>
+- [instrukce pro vedoucí a oponenty](https://www.fi.muni.cz/studies/bachelor-diploma-theses-advisors-opponents.html)
+- existuje nějaké stipendium za diplomku v angličtině, nominuje vedoucí (relevantní pro jarní semestr 2024)
+
 ## Mohlo by se hodit
 
 - úvod do EEG: https://www.ebme.co.uk/articles/clinical-engineering/introduction-to-eeg
