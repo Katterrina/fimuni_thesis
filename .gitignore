@@ -2,3 +2,4 @@ data_ukazka/
 clanky/
 __venv__/
 .ipynb_checkpoints/
+src/__pycache__/
