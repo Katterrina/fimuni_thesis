@@ -31,3 +31,27 @@
     - https://carpentries-incubator.github.io/SDC-BIDS-fMRI/07-functional-connectivity-analysis/index.html
     - https://peerherholz.github.io/workshop_weizmann/advanced/functional_connectivity.html#extracting-times-series-to-build-a-functional-connectome
 - PCI python: https://github.com/noreun/pypci/blob/master/pci.py
+
+## Metacentrum
+
+- [OnDemand](https://ondemand.grid.cesnet.cz/pun/sys/dashboard/batch_connect/sys/bc_meta_jupyter/session_contexts/new)
+- [Metacentrum wiki](https://wiki.metacentrum.cz/wiki/Main_Page)
+
+#### Virtualenv pro OnDemand
+
+```
+module add py-pip/21.3.1-gcc-10.2.1-mjt74tn
+python -m venv __venv__
+source __venv__/bin/activate
+pip install jupyter
+module rm py-pip
+python -m ipykernel install --user --name=__venv__ --env VIRTUAL_ENV "$VIRTUAL_ENV"
+mv $VIRTUAL_ENV/bin/python $VIRTUAL_ENV/bin/python.orig
+cat > $VIRTUAL_ENV/bin/python <<END
+#!/bin/bash
+module add py-pip/21.3.1-gcc-10.2.1-mjt74tn
+PATH=$VIRTUAL_ENV/bin:$PATH
+exec $VIRTUAL_ENV/bin/python.orig "\$@"
+END
+chmod a+ $VIRTUAL_ENV/bin/python
+```
