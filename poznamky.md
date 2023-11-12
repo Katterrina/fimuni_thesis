@@ -53,5 +53,5 @@ module add py-pip/21.3.1-gcc-10.2.1-mjt74tn
 PATH=$VIRTUAL_ENV/bin:$PATH
 exec $VIRTUAL_ENV/bin/python.orig "\$@"
 END
-chmod a+ $VIRTUAL_ENV/bin/python
+chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
 ```
