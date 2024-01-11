@@ -51,6 +51,9 @@ cat > $VIRTUAL_ENV/bin/python <<END
 #!/bin/bash
 module add py-pip/21.3.1-gcc-10.2.1-mjt74tn
 PATH=$VIRTUAL_ENV/bin:$PATH
+END
+chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
+```
 
 ## Dlaší datasety
 
@@ -58,6 +61,3 @@ PATH=$VIRTUAL_ENV/bin:$PATH
 - https://search.kg.ebrains.eu/instances/1570d4e5-8cc5-44b2-bfaa-f91274fe0bf3
 - https://search.kg.ebrains.eu/instances/164b7564-1730-4b51-9c98-308005b620dd
 exec $VIRTUAL_ENV/bin/python.orig "\$@"
-END
-chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
-```
