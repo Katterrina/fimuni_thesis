@@ -59,8 +59,11 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
 ## Dlaší datasety
 
 - https://search.kg.ebrains.eu/instances/f16e449d-86e1-408b-9487-aa9d72e39901
+    - Parcellation-based structural and resting-state functional brain connectomes of a healthy cohort (200 lidí z HCP)
 - https://search.kg.ebrains.eu/instances/1570d4e5-8cc5-44b2-bfaa-f91274fe0bf3
+    - F-TRACT (EEG epilepsie) 
 - https://search.kg.ebrains.eu/instances/164b7564-1730-4b51-9c98-308005b620dd
+    - Parcellation-based resting-state blood-oxygen-level-dependent (BOLD) signals of a healthy cohort (v1.0)
 
 ## Přístup k datům z HCP
 
