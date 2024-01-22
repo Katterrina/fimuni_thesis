@@ -61,3 +61,10 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
 - https://search.kg.ebrains.eu/instances/f16e449d-86e1-408b-9487-aa9d72e39901
 - https://search.kg.ebrains.eu/instances/1570d4e5-8cc5-44b2-bfaa-f91274fe0bf3
 - https://search.kg.ebrains.eu/instances/164b7564-1730-4b51-9c98-308005b620dd
+
+## Přístup k datům z HCP
+
+- přes prohlížeč to nějak nefunguje...
+- [s3cmd](https://askubuntu.com/questions/202072/what-is-a-good-amazon-s3-client)
+    - nakonfigutováno, přístupové údaje uloženy v config file
+    - dokumentace `s3cmd --help` nebo <https://s3tools.org/usage>
