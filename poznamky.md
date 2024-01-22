@@ -71,3 +71,8 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
 - [s3cmd](https://askubuntu.com/questions/202072/what-is-a-good-amazon-s3-client)
     - nakonfigutováno, přístupové údaje uloženy v config file
     - dokumentace `s3cmd --help` nebo <https://s3tools.org/usage>
+
+
+## Návrh zadání
+
+This thesis will explore methods for complex network based analysis of spatio-temporal patterns of propagation of brain activity evoked by non-invasive stimulation methods. In particular, the relationship of the responses to transcranial magnetic stimulation with the brain structural connectivity and the maps of structural and functional properties of the cortex will be explored using techniques for both static network analysis and communication dynamics. The work will be performed on open datasets.
