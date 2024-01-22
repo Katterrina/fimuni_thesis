@@ -5,3 +5,4 @@ __venv__/
 .ipynb_checkpoints/
 src/__pycache__/
 figures/
+ENIGMA/
