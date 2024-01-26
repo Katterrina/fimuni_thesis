@@ -32,6 +32,7 @@
     - https://peerherholz.github.io/workshop_weizmann/advanced/functional_connectivity.html#extracting-times-series-to-build-a-functional-connectome
 - PCI python: https://github.com/noreun/pypci/blob/master/pci.py
 - https://siibra-python.readthedocs.io/en/latest/autoapi/siibra/features/connectivity/index.html#module-siibra.features.connectivity
+- https://netneurotools.readthedocs.io/en/latest/index.html
 
 ## Metacentrum
 
