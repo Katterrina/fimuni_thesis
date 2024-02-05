@@ -60,3 +60,12 @@ Raimondo, F., Wolff, A., Sanz, L. R. D., Barra, A., Cassol, H., Carrière, M., L
 ```
 
 Nieus, T., Casarotto, S., Viganò, A., & Massimini, M. (2021). Results for complexity measures and a read-out of the state of cortical circuits after injury [Data set]. EBRAINS. https://doi.org/10.25493/5TNA-R5P
+
+
+## F-TRACT
+
+Grows on EBRAINS in several versions, here we use the latest one in the two flavors:
+- F-TRACT_P_11_v2307: responses until 200ms
+- F-TRACT_P_01_v2307: responses until 50ms
+
+Jedynak, M., Boyer, A., Lemaréchal, J.-D., Trebaul, L., Tadel, F., Bhattacharjee, M., Chanteloup-Forêt, B., Deman, P., Tuyisenge, V., Ayoubian, L., Hugues, E., Saubat-Guigui, C., Zouglech, R., Reyes-Mejia, G. C., Tourbier, S., Hagmann, P., Adam, C., Barba, C., Bartolomei, F., … F-TRACT Consortium. (2023). F-TRACT: a probabilistic atlas of anatomo-functional connectivity of the human brain (F-TRACT_P_01_v2307) [Data set]. EBRAINS. https://doi.org/10.25493/JYVR-WJ7
