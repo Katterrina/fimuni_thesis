@@ -40,6 +40,8 @@ def load_ftract(parcellation,DKT_68=False):
 
     return probability, amplitude, n_stim, n_impl, labels
 
+import matplotlib.pyplot as plt
+
 def load_enigma(reference_labels):
     SC, sc_ctx_labels, _, _ = load_sc()
     FC, _, _, _ = load_fc()
@@ -55,12 +57,17 @@ def load_enigma(reference_labels):
         else:
             i+=1
             j+=1
-            
+
     for i in mismatch_ids:
-        SC = np.insert(SC,i,np.empty((SC.shape[1])), axis=0)
-        SC = np.insert(SC,i,np.empty((SC.shape[0])), axis=1)
-        FC = np.insert(FC,i,np.empty((FC.shape[1])), axis=0)
-        FC = np.insert(FC,i,np.empty((SC.shape[0])), axis=1)
+        new_0 = np.empty((SC.shape[1],))
+        new_0.fill(np.nan)
+        SC = np.insert(SC,i,new_0, axis=0)
+        FC = np.insert(FC,i,new_0, axis=0)
+
+        new_1 = np.empty((SC.shape[0],))
+        new_1.fill(np.nan)
+        SC = np.insert(SC,i,new_1, axis=1)
+        FC = np.insert(FC,i,new_1, axis=1)
 
     SC_W = SC
     SC_L = np.where(SC==0.0,0,1/SC)
@@ -97,50 +104,45 @@ def load_domhof(parcellation,n_roi):
 
     return SC_W, SC_L, FC
 
+def reorder_matrix_based_on_reference(labels, reference_labels, matrix):
+    df_matrix = pd.DataFrame(matrix, index=labels, columns=labels)
+    df_matrix = df_matrix.loc[reference_labels,reference_labels]
+
+    return df_matrix.to_numpy()
+
 def load_rosen_halgren(reference_labels):
     path_sc_w = '../data/external/rosen_halgren_sc/public_PLoSBio_final/averageConnectivity_axonCount.mat'
     with h5py.File(path_sc_w, 'r') as f:
         SC_W = np.array(f.get('axonCount'))
 
     labels = np.loadtxt('../data/external/rosen_halgren_sc/public_PLoSBio_final/roi.txt', dtype=str)
-    
-    # reorder labels to match
-    df_SC_W =  pd.DataFrame(SC_W, index=labels, columns=labels)
-    df_SC_W = df_SC_W.loc[reference_labels,reference_labels]
 
-
-    SC_W_correct = df_SC_W.to_numpy()
-
-    SC_W = SC_W_correct
-    SC_L = np.where(SC_W_correct==0.0,0,1/SC_W_correct)
+    SC_W = reorder_matrix_based_on_reference(labels,reference_labels,SC_W)
+    SC_L = np.where(SC_W==0.0,0,1/SC_W)
 
     return SC_W, SC_L, None
 
-def glasser_roi_distances(n_roi):
-    # Teziste jednotlivych ROI (a nasledne vzdalenosti mezi nima) se daji spocitat tak, 
-    # ze se vezmou 3d souradcnice vertexu na povrchu kortexu (soubor fsaverage_ico7_pial_surf.mat, 
-    # N=163842 na hemisferu) a namapuji se na ne indexy jednotlivych ROI ze souboru 
-    # HCP-MMP1.0_fsaverage_annot.mat (annot/lIdx/lh respektive annot/lIdx/rh ).
-
+def glasser_roi_distances(n_roi,reference_labels):
     distances = np.zeros((n_roi,n_roi))
 
     surf = h5py.File('../data/external/rosen_halgren_sc/public_PLoSBio_final/fsaverage_ico7_pial_surf.mat', 'r')    
     annot = h5py.File('../data/external/rosen_halgren_sc/public_PLoSBio_final/HCP-MMP1.0_fsaverage_annot.mat', 'r')
-
-    if len(set(annot['annot/lIdx/lh'][:].squeeze())) != n_roi//2:
-        print("POZOR! tahle funkce nefunguje!")
     
     centroids = np.zeros((n_roi,3))
+    labels = []
 
     for h,hemisphere in [(0,'lh'),(1,'rh')]:
+        print(hemisphere)
         for i in range(n_roi//2):
-            coor = surf[f'srf/{hemisphere}/vertices'][:][:,annot[f'annot/lIdx/{hemisphere}'][:].squeeze()==i+1] # +1 protože číslováno od 1
-
-            # tohle by se možná mělo udělat jinak? (zajímá mě těžiště konvexního obalu? ne úplně, protože to nebude konvexní...)
+            coor = surf[f'srf/{hemisphere}/vertices'][:][:,annot[f'annot/lIdx/{hemisphere}'][:].squeeze()==i+2] 
+                # +1 protože číslováno od 1, +1 protože první je '_MedialWall'
+            labels.append("".join(chr(j) for j in annot[annot[f'annot/labs/{hemisphere}'][0][i+1]][:].squeeze()))
+                # +1 protože první je '_MedialWall'
+            
             centroids[i+h*n_roi//2] = np.mean(coor,axis=1) 
 
     for i in range(n_roi):
         for j in range(n_roi):
             distances[i,j] = np.linalg.norm(centroids[i]-centroids[j])
-            
-    return distances 
+
+    return reorder_matrix_based_on_reference(labels,reference_labels,distances)
