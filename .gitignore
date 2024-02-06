@@ -6,4 +6,4 @@ __venv__/
 src/__pycache__/
 figures/
 ENIGMA/
-.netneurotools
+netneurotools/
