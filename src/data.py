@@ -2,8 +2,11 @@ import os
 import h5py
 import numpy as np
 import pandas as pd
-
-from enigmatoolbox.datasets import load_sc, load_fc
+import logging
+try:
+    from enigmatoolbox.datasets import load_sc, load_fc
+except:
+    logging.warning('ENIGMA toolbox not installed, respective data loading will be not available.')
 
 data_root = os.path.abspath(
         os.path.join(
