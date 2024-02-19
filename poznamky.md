@@ -21,6 +21,7 @@
 - příklad obhájené práce z FI MUNI: <https://is.muni.cz/th/olo1j/>
 - [instrukce pro vedoucí a oponenty](https://www.fi.muni.cz/studies/bachelor-diploma-theses-advisors-opponents.html)
 - existuje nějaké stipendium za diplomku v angličtině, nominuje vedoucí (relevantní pro jarní semestr 2024)
+    - [stipendijní řád, Článek 16 - Stipendijní program na podporu závěrečných prací v anglickém jazyce](https://is.muni.cz/auth/do/fi/uredni_deska/predpisy/opatreni/Opatreni_dekana_13_2023_stipendijni_programy.pdf#page=12)
 
 ## Mohlo by se hodit
 
