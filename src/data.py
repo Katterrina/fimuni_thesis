@@ -19,6 +19,7 @@ def path(relp):
     return os.path.join(data_root, os.path.normpath(relp))
 
 def load_ftract(parcellation):
+    # TODO zkusit získat data přímo z f-tract.eu - zatím jsem je tam nenašla, ale v článku se píše, že by měly být
     probability = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/probability.txt.gz')
     amplitude = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/amplitude__median.txt.gz')
     n_stim = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/N_stimulations.txt.gz')
@@ -114,7 +115,7 @@ def glasser_roi_distances(n_roi,reference_labels):
     for h,hemisphere in [(0,'lh'),(1,'rh')]:
         for i in range(n_roi//2):
             coor = surf[f'srf/{hemisphere}/vertices'][:][:,annot[f'annot/lIdx/{hemisphere}'][:].squeeze()==i+2] 
-                # +1 protože číslováno od 1, +1 protože první je '_MedialWall'
+                # +1 protože číslováno od 1, +1 protože první je '_MedialWall' a to nechci
             labels.append("".join(chr(j) for j in annot[annot[f'annot/labs/{hemisphere}'][0][i+1]][:].squeeze()))
                 # +1 protože první je '_MedialWall'
             
@@ -125,3 +126,25 @@ def glasser_roi_distances(n_roi,reference_labels):
             distances[i,j] = np.linalg.norm(centroids[i]-centroids[j])
 
     return reorder_matrix_based_on_reference(labels,reference_labels,distances)
+
+def load_pytepfit_sc():
+    SC_W = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_count.csv')
+    SC_L = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_distance.csv')
+
+    return SC_W, SC_L, None
+                   
+def schaefer_roi_distances(n_roi):
+    distances = np.zeros((n_roi,n_roi))
+
+    df = pd.read_csv('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_order_FSLMNI152_2mm.Centroid_RAS.csv')
+
+    centroids = np.zeros((n_roi,3))
+    centroids[:,0] = df.R
+    centroids[:,1] = df.A
+    centroids[:,2] = df.S
+
+    for i in range(n_roi):
+        for j in range(n_roi):
+            distances[i,j] = np.linalg.norm(centroids[i]-centroids[j])
+
+    return distances
