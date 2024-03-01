@@ -134,17 +134,25 @@ def load_pytepfit_sc():
     SC_W = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_count.csv')
     SC_L = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_distance.csv')
 
-    return SC_W, SC_L, None
+    mapping = pd.read_csv('../data/external/pytepfit/ROI_MAPPING.csv')
+    m = mapping.idx_csv
+
+    
+    df_SC_W =  pd.DataFrame(SC_W)
+    df_SC_W = df_SC_W.loc[m,m]
+    SC_W_corrected = df_SC_W.to_numpy()
+
+    df_SC_L =  pd.DataFrame(SC_L)
+    df_SC_L = df_SC_L.loc[m,m]
+    SC_L_corrected = df_SC_L.to_numpy()
+
+    return SC_W_corrected, SC_L_corrected, None
                    
 def schaefer_roi_distances(n_roi):
     distances = np.zeros((n_roi,n_roi))
 
-    df = pd.read_csv('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_order_FSLMNI152_2mm.Centroid_RAS.csv')
-
-    centroids = np.zeros((n_roi,3))
-    centroids[:,0] = df.R
-    centroids[:,1] = df.A
-    centroids[:,2] = df.S
+    df = pd.read_csv('../data/external/pytepfit/ROI_MAPPING.csv')
+    centroids = np.stack(df.geom_mne.apply(lambda x: np.fromstring(x[1:-1], dtype=float, sep=' ')).to_numpy(),axis=0)
 
     for i in range(n_roi):
         for j in range(n_roi):
