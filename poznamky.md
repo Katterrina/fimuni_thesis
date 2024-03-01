@@ -34,6 +34,7 @@
 - https://siibra-python.readthedocs.io/en/latest/autoapi/siibra/features/connectivity/index.html#module-siibra.features.connectivity
 - https://netneurotools.readthedocs.io/en/latest/index.html
 - https://dartbrains.org/content/Parcellations.html
+- https://github.com/Davi1990/DissNet
 
 ## Metacentrum
 
@@ -63,10 +64,25 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
 
 - https://search.kg.ebrains.eu/instances/f16e449d-86e1-408b-9487-aa9d72e39901
     - Parcellation-based structural and resting-state functional brain connectomes of a healthy cohort (200 lidí z HCP)
+    - alternativa? https://search.kg.ebrains.eu/?category=Dataset&q=structural%20connectivity%20schaefer%20200%207#3f179784-194d-4795-9d8d-301b524ca00a
 - https://search.kg.ebrains.eu/instances/1570d4e5-8cc5-44b2-bfaa-f91274fe0bf3
     - F-TRACT (EEG epilepsie) 
 - https://search.kg.ebrains.eu/instances/164b7564-1730-4b51-9c98-308005b620dd
     - Parcellation-based resting-state blood-oxygen-level-dependent (BOLD) signals of a healthy cohort (v1.0)
+
+### Co jsem našla, zeptat se Honzy nebo dál prozkoumat
+
+- https://openneuro.org/datasets/ds002094/versions/1.0.0 nějaká data bez popisků?
+- https://gin.g-node.org/CIMeC/TMS-EEG_brain_connectivity_BIDS
+- https://doi.org/10.1089/brain.2016.0462 data k tomu tady nejsou, ale kdybychom je našli, tak by to asi bylo super
+- vůbec netuším, co to je, ale píšou, že data poskytnou na request https://github.com/thaivinhnguyen/EEGTMSfMRI
+- https://github.com/Song-Yufei/tms-eeg-using-optimized-sham-outside-M1 píšou, že data někde na Zenedo
+- https://www.nature.com/articles/s42003-020-0764-0#data-availability data pošlou na "reasonable request"
+    - asi to není k ničemu, protože to není source-reconstructed? 
+- https://github.com/Davi1990/EEG-and-DWI-metrics?tab=readme-ov-file - z článku od Momiho
+    - matlab a nevím, jestli tam jsou i data nebo jenom kód (protože to je matlab, tak jsem to zatím neotevírala)
+- https://zenodo.org/records/4990628 - asi ne, není source reconstructed
+- http://www.tmslab.org/netconlab-perturbation.php - ze článku TMS-EEG: Individualized perturbation of the human connectome reveals reproducible biomarkers of network dynamics relevant to cognition
 
 ## Přístup k datům z HCP
 
@@ -75,7 +91,15 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
     - nakonfigutováno, přístupové údaje uloženy v config file
     - dokumentace `s3cmd --help` nebo <https://s3tools.org/usage>
 
+## Aktuální otázky a TODO
 
-## Návrh zadání
+- teď dělám korelaci jednoho stimulovaného místa se strukturní konektivitou - když bych udělala to samé s F-Tractem, taky jen po jednotlivých řádcích, vyšlo by mi to stále korelované?
+    - zkusila jsem, vyšlo
+- path transitivity - <https://www.biorxiv.org/content/10.1101/2023.02.09.527639v2.full.pdf>
+
+
+## Oficiální zadání
+
+- TODO zkopírovat z ISu
 
 This thesis will explore methods for complex network based analysis of spatio-temporal patterns of propagation of brain activity evoked by non-invasive stimulation methods. In particular, the relationship of the responses to transcranial magnetic stimulation with the brain structural connectivity and the maps of structural and functional properties of the cortex will be explored using techniques for both static network analysis and communication dynamics. The work will be performed on open datasets.
