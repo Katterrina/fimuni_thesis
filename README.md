@@ -1,5 +1,4 @@
-# FI thesis
-
+# FI thesis: Exploration of network dynamics approaches to description of brain response to stimulation
 
 ## Installation
 
@@ -8,8 +7,8 @@ This is organized as an installable project (read more on the rationale [here](h
 First create a virtual environment. Alternatively use `conda`. Please use Python version at least 3.8.  
 
 ```shell
-$ python -mvenv env
-$ . env/bin/activate
+$ python -m venv __venv__
+$ . __venv__/bin/activate
 ```
 
 Next install the dependencies and the project itself.
@@ -22,3 +21,6 @@ $ pip install -e .
 
 Follow instructions in `data/external/REAME.md` for initialization of the external datasets.
 
+## Repository structure
+
+### 

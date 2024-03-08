@@ -47,8 +47,6 @@ def load_ftract(parcellation):
 
     return probability, amplitude, n_stim, n_impl, labels
 
-import matplotlib.pyplot as plt
-
 def load_enigma():
     SC, _, _, _ = load_sc()
     FC, _, _, _ = load_fc()
@@ -87,6 +85,14 @@ def load_domhof(parcellation,n_roi):
     FC = load_or_create_mean_matrix(rootdir+fcdir,"FC.npy","EmpCorrFC_concatenated.csv",matrix_size)
 
     return SC_W, SC_L, FC
+
+def load_domhof_for_pytepfit():
+    parcellation = "Schaefer"
+    n_roi = 200
+
+    SC_W, SC_L, FC = load_domhof(parcellation,n_roi)
+
+    return remap_schaefer_to_schaefer(remap_schaefer17_to_schaefer7(SC_W)), remap_schaefer_to_schaefer(remap_schaefer17_to_schaefer7(SC_L)), remap_schaefer_to_schaefer(remap_schaefer17_to_schaefer7(FC))
 
 def reorder_matrix_based_on_reference(labels, reference_labels, matrix):
     df_matrix = pd.DataFrame(matrix, index=labels, columns=labels)
@@ -130,23 +136,35 @@ def glasser_roi_distances(n_roi,reference_labels):
 
     return reorder_matrix_based_on_reference(labels,reference_labels,distances)
 
+def remap_schaefer_to_schaefer(matrix):
+    mapping = pd.read_csv('../data/external/pytepfit/ROI_MAPPING.csv')
+    m = mapping.idx_csv
+
+    df_matrix =  pd.DataFrame(matrix)
+    df_matrix = df_matrix.loc[m,m]
+
+    return df_matrix.to_numpy()
+
+def remap_schaefer17_to_schaefer7(matrix):
+    mapping = pd.read_csv('../data/external/pytepfit/ROI_MAPPING_7_17.csv')
+    m = mapping.idx_17
+
+    df_matrix =  pd.DataFrame(matrix)
+    df_matrix = df_matrix.loc[m,m]
+
+    return df_matrix.to_numpy()
+
 def load_pytepfit_sc():
     SC_W = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_count.csv')
     SC_L = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_distance.csv')
 
-    mapping = pd.read_csv('../data/external/pytepfit/ROI_MAPPING.csv')
-    m = mapping.idx_csv
+    return remap_schaefer_to_schaefer(SC_W), remap_schaefer_to_schaefer(SC_L), None
 
-    
-    df_SC_W =  pd.DataFrame(SC_W)
-    df_SC_W = df_SC_W.loc[m,m]
-    SC_W_corrected = df_SC_W.to_numpy()
+def load_enigma_schaefer_connectivity():
+    SC, _, _, _ = load_sc(parcellation="schaefer_200")
+    FC, _, _, _ = load_fc(parcellation="schaefer_200")
 
-    df_SC_L =  pd.DataFrame(SC_L)
-    df_SC_L = df_SC_L.loc[m,m]
-    SC_L_corrected = df_SC_L.to_numpy()
-
-    return SC_W_corrected, SC_L_corrected, None
+    return remap_schaefer_to_schaefer(SC), _, remap_schaefer_to_schaefer(FC)
                    
 def schaefer_roi_distances(n_roi):
     distances = np.zeros((n_roi,n_roi))

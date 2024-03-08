@@ -61,7 +61,7 @@ END
 chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
 ```
 
-## Dlaší datasety
+## Datasety
 
 - https://search.kg.ebrains.eu/instances/f16e449d-86e1-408b-9487-aa9d72e39901
     - Parcellation-based structural and resting-state functional brain connectomes of a healthy cohort (200 lidí z HCP)
@@ -72,6 +72,18 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
     - Parcellation-based resting-state blood-oxygen-level-dependent (BOLD) signals of a healthy cohort (v1.0)
 
 ### Co jsem našla, zeptat se Honzy nebo dál prozkoumat
+
+#### Strukturní data
+
+- https://www.nature.com/articles/s41597-022-01596-9 - mají celou pipeline včetně kódu, změnit parcelaci by snad mělo být jednoduché
+- https://github.com/MICA-MNI/micapipe - už tam mají Schaefer přímo v seznamu parcelací, tak by mělo být jednoduché ho použít
+
+#### Článek *The spectral features of EEG responses to transcranial magnetic stimulation of the primary motor cortex depend on the amplitude of the motor evoked potentials*
+
+- využívají bootstrap, stimulovali různá místa, zveřejnili data (<https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0184910&type=printable>)
+    - data nejsou source reconstructed, ale jinak vypadají dobře, byly by tam ty stimulace jinde než v M1
+
+#### Asi k ničemu
 
 - https://openneuro.org/datasets/ds002094/versions/1.0.0 nějaká data bez popisků?
 - https://gin.g-node.org/CIMeC/TMS-EEG_brain_connectivity_BIDS
@@ -85,22 +97,48 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
 - https://zenodo.org/records/4990628 - asi ne, není source reconstructed
 - http://www.tmslab.org/netconlab-perturbation.php - ze článku TMS-EEG: Individualized perturbation of the human connectome reveals reproducible biomarkers of network dynamics relevant to cognition
 
-## Přístup k datům z HCP
+## Přístup k datům z HCP přímo
 
 - přes prohlížeč to nějak nefunguje...
 - [s3cmd](https://askubuntu.com/questions/202072/what-is-a-good-amazon-s3-client)
     - nakonfigutováno, přístupové údaje uloženy v config file
     - dokumentace `s3cmd --help` nebo <https://s3tools.org/usage>
 
-## Aktuální otázky a TODO
+## Poznámky, co bych mohla dělat
 
-- teď dělám korelaci jednoho stimulovaného místa se strukturní konektivitou - když bych udělala to samé s F-Tractem, taky jen po jednotlivých řádcích, vyšlo by mi to stále korelované?
-    - zkusila jsem, vyšlo
-- path transitivity - <https://www.biorxiv.org/content/10.1101/2023.02.09.527639v2.full.pdf>
+- zkusit podle notebooku od Honzy namapovat tu SC z F-TRACTu na TMS-EEG
+- stáhnout pro F-TRACT přímo jejich data, ne ta z EBRAINS
+- prozkoumat path transitivity - <https://www.biorxiv.org/content/10.1101/2023.02.09.527639v2.full.pdf>
+- zjistit, jak využít **bootstrap** pro detekci ROI s významnou odezvou
+    - v tomto případě asi nic moc, protože nemám raw měření
+- začít psát text
+    - co je to TMS/EEG, co je to strukturní konektivita
+- prostudovat pořádně ten článek, který stimuloval i jiné lokace než M1
+- protřídit a uhladit notebooky, přidat grafy a popisky
+    - opravit ten notebook na source reconstruction
+    - notebooky by možná mohly být užitečné někomu, kdo bude mít podobné problémy :D
+- protřídit a opoznámkovat články v Zoteru
+- dodělat statistiku pro F-TRACT tak, jak ji má fakt F-TRACT
+    - parciální korelace - done, ale moc to nefunguje
+    - bootstrap, connected a unconnected region pairs
+- kouknout na Zenodo, které posílal Honza (ne na moc dlouho, asi z toho nic nebude)
+- zachovat ve strukturní konektivitě vždy stejnou density
+- https://pingouin-stats.org/build/html/generated/pingouin.distance_corr.html#pingouin.distance_corr
 
+## Zjištění a co jsem zkusila
+
+- z netneurotools se dají taky stáhnout nějaké FC a SC, ale nepíšou tam, v jaké je to parcelaci
+    - povedlo se mi vystopovat zdroj a není to kompatibilní
+- zamyslet se, jestli bych nemohla nějak použít modularitu (to by bylo cool :D)
+    - zkusit predikci šíření pomocí modularity (modul kde to je 0, ostatní 1) - samo o sobě nefunguje, možná v kobinaci s něčím
+- nějaké články
+    - rešerše Brain network communication: concepts, models and applications
+        - nejlepší zdroj k teorii k diplomce
+        - přečíst ještě jednou pořádně a rovnou z toho dělat výpisky na text práce
+            - ve zdrojích mají u článků napsáno, co tam zjistili <3
+    - The Prediction of Brain Activity from Connectivity: Advances and Applications
+        - zajímavé, ale predikují activation maps a taky mají data všechna per subject, ne průměrnou strukturní a funkční konektiivtu
 
 ## Oficiální zadání
 
-- TODO zkopírovat z ISu
-
-This thesis will explore methods for complex network based analysis of spatio-temporal patterns of propagation of brain activity evoked by non-invasive stimulation methods. In particular, the relationship of the responses to transcranial magnetic stimulation with the brain structural connectivity and the maps of structural and functional properties of the cortex will be explored using techniques for both static network analysis and communication dynamics. The work will be performed on open datasets.
+The primary concern of the thesis are the spatio-temporal patterns of brain activity evoked by direct stimulation. The objective is to explore suitable methodologies rooted in complex network analysis and compare their applicability in empirical and simulated electroencephalography recordings of responses to stimulation. The entry point to this topic will be the recent results on metrics based on network communication models capturing some of the relationship between structural connectivity and stimulus response. The original work, done on invasive intracranial data in a large cohort, serves as a basis for evaluating the extent to which these observations can be replicated in noninvasive stimulation and recordings. The student will engage with openly available datasets, namely the summary data of the Functional Brain Tractography project (F-TRACT), which provides the response probabilities and amplitudes between brain regions from intracranial recordings. Additionally, the student will utilize open transcranial magnetic stimulation datasets available in EBRAINS and other data sharing platforms. The student will familiarize herself with the aforementioned datasets and the network communication models and methods to characterize stimulus response complexity. The main focus of the student's work will be on the implementation and modification of the network communication models methodology, followed the iterative application to the non-invasive data. Subsequently, she will assess any eventual discrepancies to the results from invasive datasets, designing the appropriate approach and statistical methodology for the evaluation. Given the intricacy and depth of the background topic, the student will collaborate with experts at CEITEC MU to seek guidance on the respective aspects of the data and the surrounding neuroscientific context.
