@@ -23,4 +23,4 @@ Follow instructions in `data/external/REAME.md` for initialization of the extern
 
 ## Repository structure
 
-### 
+- TODO doplnit

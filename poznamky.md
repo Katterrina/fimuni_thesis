@@ -115,14 +115,15 @@ chmod a+x /storage/brno2/home/katterrina/__venv__/bin/python
     - co je to TMS/EEG, co je to strukturní konektivita
 - prostudovat pořádně ten článek, který stimuloval i jiné lokace než M1
 - protřídit a uhladit notebooky, přidat grafy a popisky
-    - opravit ten notebook na source reconstruction
+    - opravit ten notebook na source reconstruction - done
     - notebooky by možná mohly být užitečné někomu, kdo bude mít podobné problémy :D
 - protřídit a opoznámkovat články v Zoteru
 - dodělat statistiku pro F-TRACT tak, jak ji má fakt F-TRACT
     - parciální korelace - done, ale moc to nefunguje
     - bootstrap, connected a unconnected region pairs
 - kouknout na Zenodo, které posílal Honza (ne na moc dlouho, asi z toho nic nebude)
-- zachovat ve strukturní konektivitě vždy stejnou density
+- zachovat ve strukturní konektivitě vždy stejnou density?
+- pořádně popsat každý strukturní a funkční konektom, než ho budu používat
 - https://pingouin-stats.org/build/html/generated/pingouin.distance_corr.html#pingouin.distance_corr
 
 ## Zjištění a co jsem zkusila

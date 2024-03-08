@@ -3,6 +3,8 @@ import h5py
 import numpy as np
 import pandas as pd
 import logging
+import src.roi_remappnig as roi_remappnig
+
 try:
     from enigmatoolbox.datasets import load_sc, load_fc
 except:
@@ -17,19 +19,21 @@ data_root = os.path.abspath(
         )
 )
 
-
 def path(relp):
     return os.path.join(data_root, os.path.normpath(relp))
 
 def load_ftract(parcellation):
     # TODO zkusit získat data přímo z f-tract.eu - zatím jsem je tam nenašla, ale v článku se píše, že by měly být
-    probability = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/probability.txt.gz')
-    amplitude = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/amplitude__median.txt.gz')
-    n_stim = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/N_stimulations.txt.gz')
-    n_impl = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/N_implantations.txt.gz')
+    # možná tohle? https://zenodo.org/records/7015415#.YwTPgxzP1aR
+    ftract_path = 'external/F-TRACT/'
+    probability = np.loadtxt(path(f'{ftract_path}{parcellation}/probability.txt.gz'))
+    amplitude = np.loadtxt(path(f'{ftract_path}{parcellation}/amplitude__median.txt.gz'))
+    n_stim = np.loadtxt(path(f'{ftract_path}{parcellation}/N_stimulations.txt.gz'))
+    n_impl = np.loadtxt(path(f'{ftract_path}{parcellation}/N_implantations.txt.gz'))
 
-    labels = np.loadtxt(f'../data/external/F-TRACT/{parcellation}/{parcellation}.txt', dtype=str)
+    labels = np.loadtxt(path(f'{ftract_path}{parcellation}/{parcellation}.txt', dtype=str))
 
+    # TODO doplnit komentář, proč jsem dělala tohle, protože už ani sama nevím
     if parcellation == "DKT" or parcellation == "Destrieux":
         if parcellation == "DKT":
             roi = ['ctx-lh-bankssts','ctx-lh-caudalanteriorcingulate','ctx-lh-caudalmiddlefrontal','ctx-lh-corpuscallosum','ctx-lh-cuneus','ctx-lh-entorhinal','ctx-lh-fusiform','ctx-lh-inferiorparietal','ctx-lh-inferiortemporal','ctx-lh-isthmuscingulate','ctx-lh-lateraloccipital','ctx-lh-lateralorbitofrontal','ctx-lh-lingual','ctx-lh-medialorbitofrontal','ctx-lh-middletemporal','ctx-lh-parahippocampal','ctx-lh-paracentral','ctx-lh-parsopercularis','ctx-lh-parsorbitalis','ctx-lh-parstriangularis','ctx-lh-pericalcarine','ctx-lh-postcentral','ctx-lh-posteriorcingulate','ctx-lh-precentral','ctx-lh-precuneus','ctx-lh-rostralanteriorcingulate','ctx-lh-rostralmiddlefrontal','ctx-lh-superiorfrontal','ctx-lh-superiorparietal','ctx-lh-superiortemporal','ctx-lh-supramarginal','ctx-lh-frontalpole','ctx-lh-temporalpole','ctx-lh-transversetemporal','ctx-lh-insula','ctx-rh-bankssts','ctx-rh-caudalanteriorcingulate','ctx-rh-caudalmiddlefrontal','ctx-rh-corpuscallosum','ctx-rh-cuneus','ctx-rh-entorhinal','ctx-rh-fusiform','ctx-rh-inferiorparietal','ctx-rh-inferiortemporal','ctx-rh-isthmuscingulate','ctx-rh-lateraloccipital','ctx-rh-lateralorbitofrontal','ctx-rh-lingual','ctx-rh-medialorbitofrontal','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-paracentral','ctx-rh-parsopercularis','ctx-rh-parsorbitalis','ctx-rh-parstriangularis','ctx-rh-pericalcarine','ctx-rh-postcentral','ctx-rh-posteriorcingulate','ctx-rh-precentral','ctx-rh-precuneus','ctx-rh-rostralanteriorcingulate','ctx-rh-rostralmiddlefrontal','ctx-rh-superiorfrontal','ctx-rh-superiorparietal','ctx-rh-superiortemporal','ctx-rh-supramarginal','ctx-rh-frontalpole','ctx-rh-temporalpole','ctx-rh-transversetemporal','ctx-rh-insula']
@@ -47,12 +51,12 @@ def load_ftract(parcellation):
 
     return probability, amplitude, n_stim, n_impl, labels
 
-def load_enigma():
+def load_enigma(parcellation=None):
     SC, _, _, _ = load_sc()
     FC, _, _, _ = load_fc()
 
     SC_W = SC
-    SC_L = np.where(SC==0.0,0,1/SC)
+    SC_L = np.where(SC==0.0,np.nan,1/SC)
 
     return SC_W, SC_L, FC
 
@@ -92,13 +96,12 @@ def load_domhof_for_pytepfit():
 
     SC_W, SC_L, FC = load_domhof(parcellation,n_roi)
 
-    return remap_schaefer_to_schaefer(remap_schaefer17_to_schaefer7(SC_W)), remap_schaefer_to_schaefer(remap_schaefer17_to_schaefer7(SC_L)), remap_schaefer_to_schaefer(remap_schaefer17_to_schaefer7(FC))
+    SC_W = roi_remappnig.schaefer_to_freesurfer_schaefer(roi_remappnig.schaefer17_to_schaefer7(SC_W))
+    SC_L = roi_remappnig.schaefer_to_freesurfer_schaefer(roi_remappnig.schaefer17_to_schaefer7(SC_L))
+    FC = roi_remappnig.schaefer_to_freesurfer_schaefer(roi_remappnig.schaefer17_to_schaefer7(FC))
 
-def reorder_matrix_based_on_reference(labels, reference_labels, matrix):
-    df_matrix = pd.DataFrame(matrix, index=labels, columns=labels)
-    df_matrix = df_matrix.loc[reference_labels,reference_labels]
+    return SC_W, SC_L, FC
 
-    return df_matrix.to_numpy()
 
 def load_rosen_halgren(reference_labels):
     path_sc_w = '../data/external/rosen_halgren_sc/public_PLoSBio_final/averageConnectivity_axonCount.mat'
@@ -107,7 +110,7 @@ def load_rosen_halgren(reference_labels):
 
     labels = np.loadtxt('../data/external/rosen_halgren_sc/public_PLoSBio_final/roi.txt', dtype=str)
 
-    SC_W = reorder_matrix_based_on_reference(labels,reference_labels,SC_W)
+    SC_W = roi_remappnig.reorder_matrix_based_on_reference(labels,reference_labels,SC_W)
     SC_L = np.where(SC_W==0.0,0,1/SC_W)
 
     return SC_W, SC_L, None
@@ -124,9 +127,9 @@ def glasser_roi_distances(n_roi,reference_labels):
     for h,hemisphere in [(0,'lh'),(1,'rh')]:
         for i in range(n_roi//2):
             coor = surf[f'srf/{hemisphere}/vertices'][:][:,annot[f'annot/lIdx/{hemisphere}'][:].squeeze()==i+2] 
-                # +1 protože číslováno od 1, +1 protože první je '_MedialWall' a to nechci
+                # +1 becuse ids start from 1, +1 to skip '_MedialWall'
             labels.append("".join(chr(j) for j in annot[annot[f'annot/labs/{hemisphere}'][0][i+1]][:].squeeze()))
-                # +1 protože první je '_MedialWall'
+                # +1 to skip '_MedialWall'
             
             centroids[i+h*n_roi//2] = np.mean(coor,axis=1) 
 
@@ -134,43 +137,22 @@ def glasser_roi_distances(n_roi,reference_labels):
         for j in range(n_roi):
             distances[i,j] = np.linalg.norm(centroids[i]-centroids[j])
 
-    return reorder_matrix_based_on_reference(labels,reference_labels,distances)
-
-def remap_schaefer_to_schaefer(matrix):
-    mapping = pd.read_csv('../data/external/pytepfit/ROI_MAPPING.csv')
-    m = mapping.idx_csv
-
-    df_matrix =  pd.DataFrame(matrix)
-    df_matrix = df_matrix.loc[m,m]
-
-    return df_matrix.to_numpy()
-
-def remap_schaefer17_to_schaefer7(matrix):
-    mapping = pd.read_csv('../data/external/pytepfit/ROI_MAPPING_7_17.csv')
-    m = mapping.idx_17
-
-    df_matrix =  pd.DataFrame(matrix)
-    df_matrix = df_matrix.loc[m,m]
-
-    return df_matrix.to_numpy()
+    return roi_remappnig.reorder_matrix_based_on_reference(labels,reference_labels,distances)
 
 def load_pytepfit_sc():
     SC_W = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_count.csv')
     SC_L = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_distance.csv')
 
-    return remap_schaefer_to_schaefer(SC_W), remap_schaefer_to_schaefer(SC_L), None
+    SC_L = np.where(SC_W == 0,np.nan,SC_L)
 
-def load_enigma_schaefer_connectivity():
-    SC, _, _, _ = load_sc(parcellation="schaefer_200")
-    FC, _, _, _ = load_fc(parcellation="schaefer_200")
-
-    return remap_schaefer_to_schaefer(SC), _, remap_schaefer_to_schaefer(FC)
+    return roi_remappnig.schaefer_to_freesurfer_schaefer(SC_W), roi_remappnig.schaefer_to_freesurfer_schaefer(SC_L), None
                    
-def schaefer_roi_distances(n_roi):
-    distances = np.zeros((n_roi,n_roi))
+def roi_distances(centroids_file,geom_column):
+    df = pd.read_csv(centroids_file)
+    n_roi = len(df)
 
-    df = pd.read_csv('../data/external/pytepfit/ROI_MAPPING.csv')
-    centroids = np.stack(df.geom_mne.apply(lambda x: np.fromstring(x[1:-1], dtype=float, sep=' ')).to_numpy(),axis=0)
+    distances = np.zeros((n_roi,n_roi))
+    centroids = np.stack(df.geom_column.apply(lambda x: np.fromstring(x[1:-1], dtype=float, sep=' ')).to_numpy(),axis=0)
 
     for i in range(n_roi):
         for j in range(n_roi):
