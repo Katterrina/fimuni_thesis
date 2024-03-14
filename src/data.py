@@ -33,7 +33,7 @@ def load_ftract(parcellation):
 
     labels = np.loadtxt(path(f'{ftract_path}{parcellation}/{parcellation}.txt', dtype=str))
 
-    # TODO doplnit komentář, proč jsem dělala tohle, protože už ani sama nevím
+    # this is necessary because files with labels for these parcellations contain many other labels, which are not used
     if parcellation == "DKT" or parcellation == "Destrieux":
         if parcellation == "DKT":
             roi = ['ctx-lh-bankssts','ctx-lh-caudalanteriorcingulate','ctx-lh-caudalmiddlefrontal','ctx-lh-corpuscallosum','ctx-lh-cuneus','ctx-lh-entorhinal','ctx-lh-fusiform','ctx-lh-inferiorparietal','ctx-lh-inferiortemporal','ctx-lh-isthmuscingulate','ctx-lh-lateraloccipital','ctx-lh-lateralorbitofrontal','ctx-lh-lingual','ctx-lh-medialorbitofrontal','ctx-lh-middletemporal','ctx-lh-parahippocampal','ctx-lh-paracentral','ctx-lh-parsopercularis','ctx-lh-parsorbitalis','ctx-lh-parstriangularis','ctx-lh-pericalcarine','ctx-lh-postcentral','ctx-lh-posteriorcingulate','ctx-lh-precentral','ctx-lh-precuneus','ctx-lh-rostralanteriorcingulate','ctx-lh-rostralmiddlefrontal','ctx-lh-superiorfrontal','ctx-lh-superiorparietal','ctx-lh-superiortemporal','ctx-lh-supramarginal','ctx-lh-frontalpole','ctx-lh-temporalpole','ctx-lh-transversetemporal','ctx-lh-insula','ctx-rh-bankssts','ctx-rh-caudalanteriorcingulate','ctx-rh-caudalmiddlefrontal','ctx-rh-corpuscallosum','ctx-rh-cuneus','ctx-rh-entorhinal','ctx-rh-fusiform','ctx-rh-inferiorparietal','ctx-rh-inferiortemporal','ctx-rh-isthmuscingulate','ctx-rh-lateraloccipital','ctx-rh-lateralorbitofrontal','ctx-rh-lingual','ctx-rh-medialorbitofrontal','ctx-rh-middletemporal','ctx-rh-parahippocampal','ctx-rh-paracentral','ctx-rh-parsopercularis','ctx-rh-parsorbitalis','ctx-rh-parstriangularis','ctx-rh-pericalcarine','ctx-rh-postcentral','ctx-rh-posteriorcingulate','ctx-rh-precentral','ctx-rh-precuneus','ctx-rh-rostralanteriorcingulate','ctx-rh-rostralmiddlefrontal','ctx-rh-superiorfrontal','ctx-rh-superiorparietal','ctx-rh-superiortemporal','ctx-rh-supramarginal','ctx-rh-frontalpole','ctx-rh-temporalpole','ctx-rh-transversetemporal','ctx-rh-insula']
@@ -51,14 +51,17 @@ def load_ftract(parcellation):
 
     return probability, amplitude, n_stim, n_impl, labels
 
-def load_enigma(parcellation=None):
-    SC, _, _, _ = load_sc()
-    FC, _, _, _ = load_fc()
+def load_enigma(parcellation=None,reoreder=False):
+    SC, _, _, _ = load_sc(parcellation=parcellation)
+    FC, _, _, _ = load_fc(parcellation=parcellation)
 
-    SC_W = SC
-    SC_L = np.where(SC==0.0,np.nan,1/SC)
+    if reoreder=='PyTepFit':
+        mapping_path = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
 
-    return SC_W, SC_L, FC
+        SC = roi_remappnig.schaefer_to_schaefer(SC,mapping_path,"idx_csv")
+        FC = roi_remappnig.schaefer_to_schaefer(FC,mapping_path,"idx_csv")        
+
+    return SC, None, FC
 
 def load_or_create_mean_matrix(path_to_dir,mean_matrix_name,csv_name,matrix_size,number_of_subjects=200):
     mean_file_path = path_to_dir + mean_matrix_name
@@ -69,7 +72,7 @@ def load_or_create_mean_matrix(path_to_dir,mean_matrix_name,csv_name,matrix_size
     else:
         M = np.zeros(matrix_size)
         for i in range(number_of_subjects):
-            counts_file = path_to_dir+f"{i:03d}/"+csv_name
+            counts_file = path_to_dir+f"/{i:03d}/"+csv_name
             with open(counts_file,"r") as cf:
                 c = np.genfromtxt(cf)
             M += c/number_of_subjects
@@ -79,14 +82,14 @@ def load_or_create_mean_matrix(path_to_dir,mean_matrix_name,csv_name,matrix_size
     return M
 
 def load_domhof(parcellation,n_roi):
-    rootdir = f"../data/external/domhof/{parcellation}/"
+    rootdir = f"external/domhof/{parcellation}/"
     scdir = "1StructuralConnectivity/"
     fcdir = "2FunctionalConnectivity/"
     matrix_size = (n_roi,n_roi)
 
-    SC_W = load_or_create_mean_matrix(rootdir+scdir,"SC_W.npy","Counts.csv",matrix_size)
-    SC_L = load_or_create_mean_matrix(rootdir+scdir,"SC_L.npy","Lengths.csv",matrix_size)
-    FC = load_or_create_mean_matrix(rootdir+fcdir,"FC.npy","EmpCorrFC_concatenated.csv",matrix_size)
+    SC_W = load_or_create_mean_matrix(path(rootdir+scdir),"SC_W.npy","Counts.csv",matrix_size)
+    SC_L = load_or_create_mean_matrix(path(rootdir+scdir),"SC_L.npy","Lengths.csv",matrix_size)
+    FC = load_or_create_mean_matrix(path(rootdir+fcdir),"FC.npy","EmpCorrFC_concatenated.csv",matrix_size)
 
     return SC_W, SC_L, FC
 
@@ -96,30 +99,32 @@ def load_domhof_for_pytepfit():
 
     SC_W, SC_L, FC = load_domhof(parcellation,n_roi)
 
-    SC_W = roi_remappnig.schaefer_to_freesurfer_schaefer(roi_remappnig.schaefer17_to_schaefer7(SC_W))
-    SC_L = roi_remappnig.schaefer_to_freesurfer_schaefer(roi_remappnig.schaefer17_to_schaefer7(SC_L))
-    FC = roi_remappnig.schaefer_to_freesurfer_schaefer(roi_remappnig.schaefer17_to_schaefer7(FC))
+    mapping_17 = path('external/schaefer_parcellation_centroids/ROI_MAPPING_7_17.csv')
+    mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+
+    SC_W = roi_remappnig.schaefer_to_schaefer(roi_remappnig.schaefer_to_schaefer(SC_W,mapping_17,"idx_17"),mapping_csv,"idx_csv")
+    SC_L = roi_remappnig.schaefer_to_schaefer(roi_remappnig.schaefer_to_schaefer(SC_L,mapping_17,"idx_17"),mapping_csv,"idx_csv")
+    FC = roi_remappnig.schaefer_to_schaefer(roi_remappnig.schaefer_to_schaefer(FC,mapping_17,"idx_17"),mapping_csv,"idx_csv")
 
     return SC_W, SC_L, FC
 
 
 def load_rosen_halgren(reference_labels):
-    path_sc_w = '../data/external/rosen_halgren_sc/public_PLoSBio_final/averageConnectivity_axonCount.mat'
+    path_sc_w = path('external/rosen_halgren_sc/public_PLoSBio_final/averageConnectivity_axonCount.mat')
     with h5py.File(path_sc_w, 'r') as f:
         SC_W = np.array(f.get('axonCount'))
 
-    labels = np.loadtxt('../data/external/rosen_halgren_sc/public_PLoSBio_final/roi.txt', dtype=str)
+    labels = np.loadtxt(path('external/rosen_halgren_sc/public_PLoSBio_final/roi.txt'), dtype=str)
 
     SC_W = roi_remappnig.reorder_matrix_based_on_reference(labels,reference_labels,SC_W)
-    SC_L = np.where(SC_W==0.0,0,1/SC_W)
 
-    return SC_W, SC_L, None
+    return SC_W, None, None
 
 def glasser_roi_distances(n_roi,reference_labels):
     distances = np.zeros((n_roi,n_roi))
 
-    surf = h5py.File('../data/external/rosen_halgren_sc/public_PLoSBio_final/fsaverage_ico7_pial_surf.mat', 'r')    
-    annot = h5py.File('../data/external/rosen_halgren_sc/public_PLoSBio_final/HCP-MMP1.0_fsaverage_annot.mat', 'r')
+    surf = h5py.File(path('external/rosen_halgren_sc/public_PLoSBio_final/fsaverage_ico7_pial_surf.mat'), 'r')    
+    annot = h5py.File(path('external/rosen_halgren_sc/public_PLoSBio_final/HCP-MMP1.0_fsaverage_annot.mat'), 'r')
     
     centroids = np.zeros((n_roi,3))
     labels = []
@@ -140,22 +145,35 @@ def glasser_roi_distances(n_roi,reference_labels):
     return roi_remappnig.reorder_matrix_based_on_reference(labels,reference_labels,distances)
 
 def load_pytepfit_sc():
-    SC_W = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_count.csv')
-    SC_L = np.loadtxt('../data/external/pytepfit/Schaefer2018_200Parcels_7Networks_distance.csv')
+    pytepfit_path = 'external/pytepfit/'
+    SC_W = np.loadtxt(path(pytepfit_path+'Schaefer2018_200Parcels_7Networks_count.csv'))
+    SC_L = np.loadtxt(path(pytepfit_path+'Schaefer2018_200Parcels_7Networks_distance.csv'))
 
     SC_L = np.where(SC_W == 0,np.nan,SC_L)
 
-    return roi_remappnig.schaefer_to_freesurfer_schaefer(SC_W), roi_remappnig.schaefer_to_freesurfer_schaefer(SC_L), None
+    mapping_path = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+    return roi_remappnig.schaefer_to_schaefer(SC_W,mapping_path,"idx_csv"), roi_remappnig.schaefer_to_schaefer(SC_L,mapping_path,"idx_csv"), None
                    
-def roi_distances(centroids_file,geom_column):
-    df = pd.read_csv(centroids_file)
-    n_roi = len(df)
+def roi_distances_from_centroids(centroids):
+    n_roi = len(centroids)
 
     distances = np.zeros((n_roi,n_roi))
-    centroids = np.stack(df.geom_column.apply(lambda x: np.fromstring(x[1:-1], dtype=float, sep=' ')).to_numpy(),axis=0)
-
     for i in range(n_roi):
         for j in range(n_roi):
             distances[i,j] = np.linalg.norm(centroids[i]-centroids[j])
 
     return distances
+
+def get_centroids_from_file(centroids_file,geom_column):
+    df = pd.read_csv(centroids_file)
+    centroids = np.stack(df[geom_column].apply(lambda x: np.fromstring(x[1:-1], dtype=float, sep=' ')).to_numpy(),axis=0)
+    return centroids
+
+def get_labels_from_file(centroids_file,label_column):
+    df = pd.read_csv(centroids_file)
+    return df[label_column]
+
+def find_pivot_to_keep_xpercent_edges(matrix,n_roi=200,percent=0.85):
+    pivot_id = int((n_roi**2)*percent)
+    matrix_flat_sorted = np.sort(np.nan_to_num(matrix.flatten()))
+    return matrix_flat_sorted[pivot_id]
