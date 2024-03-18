@@ -7,4 +7,4 @@ src/__pycache__/
 figures/
 ENIGMA/
 netneurotools/
-src.eeg-info
+src.egg-info/
