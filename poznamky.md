@@ -36,6 +36,7 @@
 - https://netneurotools.readthedocs.io/en/latest/index.html
 - https://dartbrains.org/content/Parcellations.html
 - https://github.com/Davi1990/DissNet
+- https://dartbrains.org/content/Parcellations.html
 
 ## Metacentrum
 
