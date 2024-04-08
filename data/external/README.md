@@ -1,71 +1,78 @@
 # External datasets
 
-Here we document how to obtain the external datasets used in the project.
+Here we document how to obtain the external datasets used in the project. For each dataset, files used in the project are commented here.
 
-## TMS-EEG Annen et al.
+## F-TRACT dataset
 
-1. Head over to the EBRAINS KG: https://doi.org/10.25493/G8E3-DQE
-2. Request data access and download the data (whole bucket)
-3. Extract to annen_tms_eeg_ebrains
+Availible on EBRAINS in several versions, here we use the latest F-TRACT_P_11_v2307 (responses until 200ms). We use DKT, Dexterious and MNI-HCP-MMP1 parcellations.
+
+Jedynak, M., Boyer, A., Lemaréchal, J.-D., Trebaul, L., Tadel, F., Bhattacharjee, M., Chanteloup-Forêt, B., Deman, P., Tuyisenge, V., Ayoubian, L., Hugues, E., Saubat-Guigui, C., Zouglech, R., Reyes-Mejia, G. C., Tourbier, S., Hagmann, P., Adam, C., Barba, C., Bartolomei, F., … F-TRACT Consortium. (2023). F-TRACT: a probabilistic atlas of anatomo-functional connectivity of the human brain (F-TRACT_P_01_v2307) [Data set]. EBRAINS. https://doi.org/10.25493/5AM4-J3F
 
 ```
-├── data-descriptor_a3dade301e9f.pdf
-├── participants.csv
-├── sub-S01
-│   └── sub-S01.nxe
+F-TRACT
+├── data-descriptor_eaa26e226384.pdf
+├── <parcellation>
+│   └── <parcellation>.txt			# list of ROI names in the order that is used in the matrices
+│   └── probability.txt.gz			# matrix of response probabilities, one row per stimulated ROI
+│   └── amplitude__median.txt.gz	# matrix of response median amplitudes, one row per stimulated ROI
 │   ....
-└── sub-S12
-    └── sub-S12.nxe
+└── ....
 ```
 
+## PyTepFit 
 
+TMS-EEG data in the PyTepFit study were taken from an open dataset at https://figshare.com/articles/dataset/TEPs-_SEPs/7440713
 
-Raimondo, F., Wolff, A., Sanz, L. R. D., Barra, A., Cassol, H., Carrière, M., Laureys, S., & Gosseries, O. (2020). TMS-EEG perturbation in patients with disorders of consciousness [Data set]. Human Brain Project Neuroinformatics Platform. 
+data: Biabani M Fornito A Mutanen TP Morrow J Rogasch NC (2019) figshare ID TEPs-_SEPs/7440713. TEPs-PEPs.
+PyTepFit: Davide Momi, Zheng Wang, John D Griffiths (2023) TMS-evoked responses are driven by recurrent large-scale network dynamics eLife 12:e83232 https://doi.org/10.7554/eLife.83232 
+    
 
+## Rosen-Halgren dataset
 
-## TMS-EEG Nieus et al
+Availible on Zenodo, we use the version 3.2. Associated paper decribing the data availible here: https://doi.org/10.1523/ENEURO.0416-20.2020
 
-1. Head over to the EBRAINS KG: EBRAINS. https://doi.org/10.25493/5TNA-R5P
-2. Request data access and download the data (whole bucket)
-3. Extract to nieus_tms_eeg_ebrains
+Rosen, B. Q., & Halgren, E. (2021). A whole-cortex probabilistic diffusion tractography connectome (3.2) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.10150880
 
 ```
-├── data-descriptor.pdf
-├── dataset_description.json
-├── derivatives
-│   └── epochs
-│       ├── sub-01
-│       │   ├── eeg
-│       │   │   ├── sub-01_task-tmseeg_coordsystem.json
-│       │   │   ├── sub-01_task-tmseeg_electrodes.tsv
-│       │   │   ├── sub-01_task-tmseeg_run-01_channels.tsv
-│       │   │   ├── sub-01_task-tmseeg_run-01_epochs.json
-│       │   │   ├── sub-01_task-tmseeg_run-01_epochs.npy
-│       │   │   └── sub-01_task-tmseeg_run-01_epochs.tsv
-│       │   └── sub-01_scans.tsv
-│       ...
-│       └── sub-06
-│           ├── ...
-├── participants.json
-├── participants.tsv
-├── raw
-│   ├── sub-01
-│   │   └── anat
-│   │       ├── sub-01_T1w.json
-│   │       └── sub-01_T1w.nii
-│   ...
-│   └── sub-06
-│       └── ...
-└── TMSEEGlesion_README.md
+rosen_halgren
+├── averageConnectivity_Fpt.mat				# structural connectivity matrix consisting of the 360 HCP-MMPS1.0 atlas parcels (streamline counts fractionally scaled yielding the log probability) together with ROI names
+├── averageConnectivity_tractLengths.mat	# matrix of average tract lengths between ROIs
+└── ....
 ```
 
-Nieus, T., Casarotto, S., Viganò, A., & Massimini, M. (2021). Results for complexity measures and a read-out of the state of cortical circuits after injury [Data set]. EBRAINS. https://doi.org/10.25493/5TNA-R5P
+## Mica-Mics dataset
 
+Availible at the Canadian Open Neuroscience Platform (CONP): https://n2t.net/ark:/70798/d72xnk2wd397j190qv We used glasser360 and schaefer200 parcellation.
 
-## F-TRACT
+Royer, J., Rodriguez-Cruces, R., Tavakol, S., Lariviere, S., Herholz, P., Li, Q., Vos de Wael, R., Paquola, C., Benkarim, O., Park, B., Lowe, A.J., Margulies, D.S., Smallwood, J., Bernasconi, A., Bernasconi, N., Frauscher, B., Bernhardt, B.C., 2021. An open MRI dataset for multiscale neuroscience. bioRxiv 2021.08.04.454795. https://doi.org/10.1101/2021.08.04.454795
 
-Grows on EBRAINS in several versions, here we use the latest one in the two flavors:
-- F-TRACT_P_11_v2307: responses until 200ms
-- F-TRACT_P_01_v2307: responses until 50ms
+Downloaded using datalad with this sequence of commands:
+```
+TODO
+```
 
-Jedynak, M., Boyer, A., Lemaréchal, J.-D., Trebaul, L., Tadel, F., Bhattacharjee, M., Chanteloup-Forêt, B., Deman, P., Tuyisenge, V., Ayoubian, L., Hugues, E., Saubat-Guigui, C., Zouglech, R., Reyes-Mejia, G. C., Tourbier, S., Hagmann, P., Adam, C., Barba, C., Bartolomei, F., … F-TRACT Consortium. (2023). F-TRACT: a probabilistic atlas of anatomo-functional connectivity of the human brain (F-TRACT_P_01_v2307) [Data set]. EBRAINS. https://doi.org/10.25493/JYVR-WJ7
+```
+mica-mics
+├── sc_<parcellation><number of ROIs>
+│   └── sub-HC<subject number xxx>_ses-01_space-dwinative_atlas-<parcellation><number of ROIs>_desc-edgeLength.txt	# edge length matrix for subject xxx
+│   └── sub-HC<subject number xxx>_ses-01_space-dwinative_atlas-<parcellation><number of ROIs>_desc-sc.txt			# structural connectivity matrix for subject xxx
+└── ....
+```
+
+## Domhof dataset
+
+Availible on EBRAINS: https://doi.org/10.25493/NVS8-XS5 Downloaded parcellations 070-DesikanKilliany.zip as DKT, 100-Schaefer17Networks.zip as Schaefer, 150-Destrieux.zip as Dexterious.
+
+Domhof, J. W. M., Jung, K., Eickhoff, S. B., & Popovych, O. V. (2022). Parcellation-based structural and resting-state functional brain connectomes of a healthy cohort (v1.1) [Data set]. EBRAINS. https://doi.org/10.25493/NVS8-XS5
+
+```
+domhof
+├── <parcellation>
+│   └── 0ImageProcessing
+│   └── 1StructuralConnectivity
+│	│	└── <xxx>					# subject number
+│	│		└── Counts.csv			#
+│	│		└── Lengths.csv			#
+│   └── 2FunctionalConnectivity
+└── ....
+```
