@@ -210,7 +210,7 @@ def load_rosen_halgren(reference_labels=None):
 
     return SC_W, SC_L
 
-def glasser_labels():
+def ftract_compatible_glasser_labels():
     file = pd.read_csv(path('external/glasser_parcellation_centriods/HCP-MMP1_UniqueRegionList.csv'))  
 
     def premute_region_name(name):
@@ -223,8 +223,14 @@ def glasser_labels():
         
     return file["regionName"].apply(premute_region_name)
 
-def glasser_roi_distances():
+def load_glasser_centroids(ftract_labels=None):
     centroids_file = pd.read_csv(path('external/glasser_parcellation_centriods/HCP-MMP1_UniqueRegionList.csv'))   
+    
+    if ftract_labels is not None:
+        labels = ftract_compatible_glasser_labels()
+        centroids_file['ftract_labels'] = labels
+        centroids_file = centroids_file.set_index('ftract_labels')
+        centroids_file = centroids_file.reindex(index=ftract_labels)
     
     n_roi = len(centroids_file)
     centroids = np.zeros((n_roi,3))
@@ -232,6 +238,11 @@ def glasser_roi_distances():
     centroids[:,1] = centroids_file["y-cog"]
     centroids[:,2] = centroids_file["z-cog"]
 
+    return centroids
+
+def glasser_roi_distances(ftract_labels=None):
+
+    centroids = load_glasser_centroids(ftract_labels=ftract_labels)
     distance_matrix = roi_distances_from_centroids(centroids)
 
     return distance_matrix
@@ -293,7 +304,7 @@ def keep_val_where_weight(SC_W,SC_L):
     return SC_W,SC_L
 
 def load_set_of_glasser_matrices_for_ftract(ftract_labels,ED=None):
-    labels = glasser_labels()
+    labels = ftract_compatible_glasser_labels()
 
     SC_matrices_mica = []
 
