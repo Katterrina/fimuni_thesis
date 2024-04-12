@@ -4,7 +4,7 @@ Here we document how to obtain the external datasets used in the project. For ea
 
 ## F-TRACT dataset
 
-Availible on EBRAINS in several versions, here we use the latest F-TRACT_P_11_v2307 (responses until 200ms). We use DKT, Dexterious and MNI-HCP-MMP1 parcellations.
+Availible on EBRAINS in several versions, here we use the latest F-TRACT_P_11_v2307 (responses until 200ms). We use DKT and MNI-HCP-MMP1 parcellations.
 
 Jedynak, M., Boyer, A., Lemaréchal, J.-D., Trebaul, L., Tadel, F., Bhattacharjee, M., Chanteloup-Forêt, B., Deman, P., Tuyisenge, V., Ayoubian, L., Hugues, E., Saubat-Guigui, C., Zouglech, R., Reyes-Mejia, G. C., Tourbier, S., Hagmann, P., Adam, C., Barba, C., Bartolomei, F., … F-TRACT Consortium. (2023). F-TRACT: a probabilistic atlas of anatomo-functional connectivity of the human brain (F-TRACT_P_01_v2307) [Data set]. EBRAINS. https://doi.org/10.25493/5AM4-J3F
 
@@ -76,3 +76,8 @@ domhof
 │   └── 2FunctionalConnectivity
 └── ....
 ```
+
+
+## K roztřízení:
+
+https://github.com/MICA-MNI/micapipe/blob/master/parcellations/rh.schaefer-200_mics.annot

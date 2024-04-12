@@ -140,8 +140,22 @@ def load_domhof(parcellation,n_roi,mode="mean",distances=None):
 
     return SC_W, SC_L
 
+
+def load_mica_for_pytepfit(mode="mean"):
+    parcellation = "schaefer200"
+    n_roi = 200
+
+    SC_W, SC_L = load_mica(parcellation,n_roi,mode=mode)
+
+    mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+
+    SC_W = roi_remappnig.schaefer_to_schaefer(SC_W,mapping_csv,"idx_csv")
+    SC_L = roi_remappnig.schaefer_to_schaefer(SC_L,mapping_csv,"idx_csv")
+
+    return SC_W, SC_L
+
 def load_domhof_for_pytepfit(mode="mean"):
-    parcellation = "Schaefer"
+    parcellation = "schaefer200"
     n_roi = 200
 
     SC_W, SC_L = load_domhof(parcellation,n_roi,mode=mode)
@@ -256,7 +270,7 @@ def load_pytepfit_sc():
     SC_L = np.where(SC_W == 0,np.nan,SC_L)
 
     mapping_path = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
-    return roi_remappnig.schaefer_to_schaefer(SC_W,mapping_path,"idx_csv"), roi_remappnig.schaefer_to_schaefer(SC_L,mapping_path,"idx_csv"), None
+    return roi_remappnig.schaefer_to_schaefer(SC_W,mapping_path,"idx_csv"), roi_remappnig.schaefer_to_schaefer(SC_L,mapping_path,"idx_csv")
                    
 def roi_distances_from_centroids(centroids):
     n_roi = len(centroids)
@@ -276,11 +290,6 @@ def get_centroids_from_file(centroids_file,geom_column):
 def get_labels_from_file(centroids_file,label_column):
     df = pd.read_csv(centroids_file)
     return df[label_column]
-
-def find_pivot_to_keep_xpercent_edges(matrix,n_roi=200,percent=0.85):
-    pivot_id = int((n_roi**2)*percent)
-    matrix_flat_sorted = np.sort(np.nan_to_num(matrix.flatten()))
-    return matrix_flat_sorted[pivot_id]
 
 def rosenhalgren_sc_averaging(M):
     M_mean = np.mean(M,axis=0)
@@ -338,6 +347,28 @@ def load_set_of_glasser_matrices_for_ftract(ftract_labels,ED=None):
 
     return SC_matrices
 
+def load_set_of_schaefer_matrices_for_pytepfit(ED=None):
+    SC_matrices = []
+
+    SC_W_pytep, SC_L_pytep = load_pytepfit_sc()
+    SC_matrices.append(("PyTepFit",SC_W_pytep, SC_L_pytep,np.log(SC_W_pytep)))
+
+    SC_W_ENIGMA, _ = load_enigma(parcellation="schaefer_200",reoreder='PyTepFit')
+    # SC_W_ENIGMA = np.where(SC_W_ENIGMA==1,np.nan,SC_W_ENIGMA) # proč tam skra mají všude 1???
+    SC_matrices.append(("Enigma",np.exp(SC_W_ENIGMA), None,SC_W_ENIGMA,))
+
+    SC_W_dom, SC_L_dom = load_domhof_for_pytepfit(mode="rh_averaging")
+    SC_matrices.append(("Domhof_rh",SC_W_dom, SC_L_dom,np.log(SC_W_dom)))
+
+    SC_W_mica, SC_L_mica = load_mica_for_pytepfit(mode="rh_averaging")
+    SC_matrices.append(("Mica-Mics_rh",SC_W_mica, SC_L_mica,np.log(SC_W_mica)))
+
+    #if ED is not None:
+    #    SC_W_M_dist, SC_L_M_dist, _ = load_domhof_for_pytepfit(mode="dist_dep_thresholding",ED=ED)
+    #    SC_matrices.append(("Mica-Mics_dist",SC_W_M_dist, SC_L_M_dist,np.log(SC_W_M_dist)))
+
+    return SC_matrices
+
 def load_set_of_DKT_matrices_for_ftract(ftract_labels,ids_to_delete_in_dkt):
     SC_matrices = []
 
@@ -361,6 +392,15 @@ def load_set_of_DKT_matrices_for_ftract(ftract_labels,ids_to_delete_in_dkt):
     SC_matrices.append(("Domhof_rh",SC_W_D_rh, SC_L_D_rh,None))
 
     return SC_matrices
+
+def find_pivot_to_keep_xpercent_edges(matrix,n_roi=200,percent=0.85):
+    pivot_id = int((n_roi**2)*percent)
+    matrix_flat_sorted = np.sort(np.nan_to_num(matrix.flatten()))
+    return matrix_flat_sorted[pivot_id]
+
+def find_pivot_to_keep_x_edges(matrix,x):
+    matrix_flat_sorted = np.flip(np.sort(np.nan_to_num(matrix.flatten())))
+    return matrix_flat_sorted[x]
 
 # from netneurotools, added hemiid creation
 
