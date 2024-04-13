@@ -113,6 +113,10 @@ def create_averaged_matrix_based_on_mode(mode,M,distances=None):
     else:
         print("Invalid mode!")
 
+    # we do not consider directed edges, so the resulting matrix should be symmetric
+    # it is not always the case because of numerical instability, so we enforce symetry here
+    SC_W = (SC_W+SC_W.T) /2 
+
     return SC_W
             
 
