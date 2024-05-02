@@ -1,9 +1,9 @@
 numpy
 mne
-jupyterlab
 pandas
 matplotlib
 ipympl
 mne-connectivity
 scipy
 autoreject
+siibra
