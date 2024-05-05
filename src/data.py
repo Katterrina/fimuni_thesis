@@ -19,11 +19,34 @@ def load_matrices_for_specified_preprocessings(matrix_loader,
                                                dataset_name,
                                                parcellation,
                                                ED=None,
-                                               list_of_preprocessing_methods =["simple","cons","dist","rh"]):
+                                               averaging_methods =["simple","cons","dist","rh"]):
+    """
+    Load a set of matrices from a dataset, one matrix per averaging method specified
+    in a list of averaging methods.
+
+    Parameters:
+    matrix_loader (function): function loading individual matrices based on 
+        paramteters parcellation (str), mode (str, indicates the averaging method),
+        and distances (ROI distances in the parcellation, necessary when dist in 
+        list of averaging methods) 
+    dataset_name (str): string for indication of the data source in the result
+    parcellation (str): string indicating the brain parcellation, posible options
+        depend on the dataset
+    ED (2D np.array): matrix of Euclidean distances of ROI in selected parcellation
+    averaging_methods (list[str]): list of averaging methods we want to load,
+        possible options ["simple","cons","dist","rh"]
+
+    Returns:
+    list[(str, 2D np.array, 2D np.array, 2D np.array)]: 
+        string in a form <dataset>_<averaging method>
+        structural connectivity weights
+        structural connectivity lengths
+        logarithm of structural connectivity weights
+    """
     
     SC_matrices= []
 
-    for mode in list_of_preprocessing_methods:
+    for mode in averaging_methods:
         if mode == "dist" and ED is None:
             continue
         SC_W, SC_L = matrix_loader(parcellation,mode=mode,distances=ED)
@@ -32,53 +55,122 @@ def load_matrices_for_specified_preprocessings(matrix_loader,
     return SC_matrices
 
 def load_set_of_glasser_matrices_for_ftract(ED=None):
+    """
+    Load all matrices available in Glasser (MNI-HCP-MMP1) parcellation 
+    and reorder them to match the ordering of ROIs in F-TRACT.
+
+    Parameters:
+    ED (2D np.array): matrix of Euclidean distances of ROI in Glasser parcellation
+        ordered by F-TRACT labels
+
+    Returns:
+    list[(str, 2D np.array, 2D np.array, 2D np.array)]: 
+        string in a form <dataset>_<averaging method>
+        structural connectivity weights
+        structural connectivity lengths
+        logarithm of structural connectivity weights    
+    """
 
     ftract_labels = load_ftract_labels("MNI-HCP-MMP1")
-    labels = ftract_compatible_glasser_labels()
+
+    # load and preprocess Glasser labels such that they match 
+    # the labels in F-TTRACT
+    labels = ftract_compatible_glasser_labels() 
+
     SC_matrices = []
 
+    # Mica-Mics dataset
     SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix,"Mica-Mics","glasser360",ED)
+
     for name, SC_W, SC_L, SC_W_log in SC_matrices_mica:
         SC_W, SC_L  = keep_val_where_weight(SC_W, SC_L)
+
         SC_W = reorder_matrix_based_on_reference(labels,ftract_labels,SC_W)
         SC_L = reorder_matrix_based_on_reference(labels,ftract_labels,SC_L)
         SC_W_log = reorder_matrix_based_on_reference(labels,ftract_labels,SC_W_log)
+
         SC_matrices.append((name, SC_W, SC_L, SC_W_log))
 
+    # Enigma dataset
     SC_W_E = load_enigma_sc_matrix(parcellation="glasser_360")
     SC_W_E = reorder_matrix_based_on_reference(labels,ftract_labels,SC_W_E)
     SC_matrices.append(("Enigma_dist",np.exp(SC_W_E), None,SC_W_E))
 
+    # Rosen-Halgren dataset
     SC_W_RH_log, SC_L_RH = load_rosen_halgren(ftract_labels)
     SC_W_RH_log, SC_L_RH = keep_val_where_weight(SC_W_RH_log, SC_L_RH)
     SC_matrices.append(("Rosen-Halgren_rh",10**SC_W_RH_log, SC_L_RH,SC_W_RH_log))
 
     return SC_matrices
 
-def load_set_of_schaefer_matrices_for_pytepfit(ED=None,preprocessing_methods=None):
+def load_set_of_schaefer_matrices_for_pytepfit(ED=None,averaging_methods=None):
+    """
+    Load all matrices available in Schaefer parcellation and reorder
+    them to match the ordering of ROIs in PyTepFit TMS-EEG.
+
+    Parameters:
+    ED (2D np.array): matrix of Euclidean distances of ROI in Glasser parcellation
+        ordered by F-TRACT labels
+    averaging_methods (list[str]): list of averaging methods we want to load,
+        possible options ["simple","cons","dist","rh"], used when dataset allows
+
+    Returns:
+    list[(str, 2D np.array, 2D np.array, 2D np.array)]: 
+        string in a form <dataset>_<averaging method>
+        structural connectivity weights
+        structural connectivity lengths
+        logarithm of structural connectivity weights    
+    """
+
     SC_matrices = []
 
     SC_W_pytep, SC_L_pytep = load_pytepfit_sc()
-    SC_matrices.append(("PyTepFit",SC_W_pytep, SC_L_pytep,np.log(SC_W_pytep)))
+    SC_matrices.append(("PyTepFit_simple",SC_W_pytep, SC_L_pytep,np.log(SC_W_pytep)))
 
     SC_W_ENIGMA = load_enigma_sc_matrix(parcellation="schaefer_200",reoreder='PyTepFit')
     SC_matrices.append(("Enigma_dist",np.exp(SC_W_ENIGMA), None,SC_W_ENIGMA,))
 
     parcellation = "schaefer200"
-    if preprocessing_methods is None:
-        SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix,"Domhof",parcellation,ED)
-        SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix,"Mica-Mics",parcellation,ED)
+    if averaging_methods is None:
+        SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix_for_pytepfit,"Domhof",parcellation,ED)
+        SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix_for_pytepfit,"Mica-Mics",parcellation,ED)
     else:
-        SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix,"Domhof",parcellation,ED,
-                                                                        list_of_preprocessing_methods=preprocessing_methods)
-        SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix,"Mica-Mics",parcellation,ED,
-                                                                        list_of_preprocessing_methods=preprocessing_methods)
+        SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix_for_pytepfit,"Domhof",parcellation,ED,
+                                                                        averaging_methods=averaging_methods)
+        SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix_for_pytepfit,"Mica-Mics",parcellation,ED,
+                                                                        averaging_methods=averaging_methods)
     return SC_matrices+SC_matrices_domhof+SC_matrices_mica
 
 def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=None,ED=None):
+    """
+    Load all matrices available in DeskianKilliany parcellation 
+    and reorder them to match the ordering of ROIs in F-TRACT.
+
+    Parameters:
+    ids_to_delete_in_dkt (list[str]): we found that some datasets indicate 
+        that they use DeskianKilliany parcellation, which is supposed to 
+        have 68 ROIs, but the mshape of matrices is 70x70, therefore it is 
+        necessary to remove two ROIs to have those matrices compatible with 
+        the rest, which really has the shape 68x68 (specific indeces that 
+        should be deleted were found ad hoc)
+    ED (2D np.array): matrix of Euclidean distances of ROI in Glasser parcellation
+        ordered by F-TRACT labels
+
+    Returns:
+    list[(str, 2D np.array, 2D np.array, 2D np.array)]: 
+        string in a form <dataset>_<averaging method>
+        structural connectivity weights
+        structural connectivity lengths
+        logarithm of structural connectivity weights    
+    """
+
     SC_matrices = []
 
-    SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix,"Domhof","DKT",ED,list_of_preprocessing_methods=["simple","cons","rh"])
+    SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix,
+                                                                    "Domhof",
+                                                                    "DKT",
+                                                                    ED,
+                                                                    averaging_methods=["simple","cons","rh"])
 
     for name, SC_W_D, SC_L_D, SC_W_log_D in SC_matrices_domhof:
         SC_W_D, SC_L_D  = keep_val_where_weight(SC_W_D, SC_L_D)
@@ -90,7 +182,7 @@ def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=None,ED=None):
         SC_matrices.append((name, SC_W_D, SC_L_D, SC_W_log_D))
 
     SC_W_E = load_enigma_sc_matrix(parcellation="DKT")
-    SC_matrices.append(("Enigma",np.exp(SC_W_E), None,SC_W_E))
+    SC_matrices.append(("Enigma_dist",np.exp(SC_W_E), None,SC_W_E))
 
     return SC_matrices
 
@@ -99,6 +191,24 @@ def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=None,ED=None):
 # ===================================================================
 
 def load_ftract(parcellation,short=False):
+    """
+    Load F-TRACT functional dataset.
+
+    Parameters:
+    parcellation (str): string indicating which brain parcellation we
+        want to use, possible options based on downloaded data
+    short (bool): indicator if we want to use the long (200 ms)
+        or short (50 ms) version of F-TRACT responses
+
+    Returns:
+    tuple (probability, amplitude, delay_onset, delay_peak, n_stim, n_impl, labels) 
+        probability, amplitude, delay_onset, delay_peak: 2D np.arrays 
+            characterizing the stimulus response
+        n_stim: 2D np.array
+            number of stimulations/measurements for each pair of nodes
+        n_impl: 
+            number of times electrodes were implanted for each pair of nodes
+    """
 
     if short:
         ftract_path = 'external/F-TRACT_short/'
@@ -142,7 +252,7 @@ def load_ftract(parcellation,short=False):
 try:
     from enigmatoolbox.datasets import load_sc
 except:
-    logging.warning('ENIGMA toolbox not installed, respective data loading will be not available.')
+    logging.warning('ENIGMA toolbox not installed, respective data loading will be not available. Install ENIGMA toolbox before further use.')
 
 
 def load_enigma_sc_matrix(parcellation=None,reoreder=None):
@@ -172,6 +282,24 @@ def load_enigma_sc_matrix(parcellation=None,reoreder=None):
 # ===================================================================
 
 def load_subjects_3Dmatrix_domhof(path_to_dir,csv_name,n_roi,number_of_subjects=200):
+    """
+    Load 3D matrix consisting of individual structural connectivity matrices
+    from Domhof dataset.
+
+    Parameters:
+    path_to_dir (str/path): path to directory where data for individual 
+        subjects are stored
+    csv_name (str): name of the files  where desired matrices are stored,
+        usually Counts.csv or Lengths.csv 
+    n_roi (int): number of ROIs, specify based on parcellation, sholud be
+        the same as the dimensions of individual matrices we want to load
+    number_of_subjects (int): number of subjects we want to load, usually
+        the number of subject foledrs in path_to_dir folder
+
+    Returns:
+    3D numpy array (number_of_subjects,n_roi,n_roi): structural connectivity matrices
+        for all subjects defined by number_of_subjects    
+    """
     M = np.zeros((number_of_subjects,n_roi,n_roi))
     for i in range(number_of_subjects):
         counts_file = path_to_dir+f"/{i:03d}/"+csv_name
@@ -182,6 +310,27 @@ def load_subjects_3Dmatrix_domhof(path_to_dir,csv_name,n_roi,number_of_subjects=
     return M
 
 def load_domhof_matrix(parcellation,mode="mean",distances=None):
+    """
+    Load group averaged matrix from Domhof dataset based on
+    averaging method mode.
+
+    Parameters:
+    parcellation (str): string indicating which brain parcellation we
+        want to use, possible options based on downloaded data
+    mode (str): group averaging mode, select an option 
+        from ["simple","cons","dist","rh"]
+            - simple: simple average
+            - cons: consensus thresholding
+            - dist: distance-dependent consensus thresholding
+            - rh: Rosen and Halgren's ageraging method
+    distances (2D np.array): ROI distance matrix, i.e. Euclidean
+        distances of ROIs, necessary for "dist" mode
+
+    Returns:
+    tuple(2D np.array, 2D np.array): 
+        structural connectivity weights, structural connectivity lengths
+    """
+
     if parcellation == "DKT":
         n_roi = 70
     elif parcellation == "schaefer200":
@@ -210,10 +359,31 @@ def load_domhof_matrix(parcellation,mode="mean",distances=None):
 
     return SC_W, SC_L
 
-def load_domhof_matrix_for_pytepfit(mode="mean"):
-    parcellation = "schaefer200"
+def load_domhof_matrix_for_pytepfit(parcellation="schaefer200",mode="mean",distances=None):
+    """
+    Load group averaged matrix from Domhof dataset based on
+    averaging method mode and reorder for compatibility with
+    TMS-EEG PyTepFit data.
 
-    SC_W, SC_L = load_domhof_matrix(parcellation,mode=mode)
+    Parameters:
+    parcellation (str): string indicating which brain parcellation we
+        want to use, it is here only for compatibility and is later 
+        set to schaefer200 no matter what
+    mode (str): group averaging mode, select an option 
+        from ["simple","cons","dist","rh"]
+            - simple: simple average
+            - cons: consensus thresholding
+            - dist: distance-dependent consensus thresholding
+            - rh: Rosen and Halgren's ageraging method
+    distances (2D np.array): ROI distance matrix, i.e. Euclidean
+        distances of ROIs, necessary for "dist" mode
+
+    Returns:
+    tuple(2D np.array, 2D np.array): 
+        structural connectivity weights, structural connectivity lengths
+    """
+
+    SC_W, SC_L = load_domhof_matrix(parcellation,mode=mode,distances=distances)
 
     mapping_17 = path('external/schaefer_parcellation_centroids/ROI_MAPPING_7_17.csv')
     mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
@@ -227,7 +397,28 @@ def load_domhof_matrix_for_pytepfit(mode="mean"):
 # ============================ Mica-Mics ============================
 # ===================================================================
 
-def load_subjects_3Dmatrix_mica(path_to_dir,parcellation="glasser360",n_roi=360,number_of_subjects=50,sc_or_lengths='sc'):    
+def load_subjects_3Dmatrix_mica(path_to_dir,parcellation="glasser360",n_roi=360,number_of_subjects=50,sc_or_lengths='sc'):   
+    """
+    Load 3D matrix consisting of individual structural connectivity matrices
+    from Mica-Mics dataset.
+
+    Parameters:
+    path_to_dir (str/path): path to directory where data for individual 
+        subjects are stored
+    parcellation (str): string indicating which brain parcellation we
+        want to use, possible options based on downloaded data
+    n_roi (int): number of ROIs, specify based on parcellation, sholud be
+        the same as the dimensions of individual matrices we want to load
+    number_of_subjects (int): number of subjects we want to load, usually
+        the number of subject foledrs in path_to_dir folder
+    sc_or_lengths: indicated if we want to load structural connectivity
+        weights (sc) or lengths (edgeLength)
+
+    Returns:
+    3D numpy array (number_of_subjects,n_roi,n_roi): structural connectivity matrices
+        for all subjects defined by number_of_subjects    
+    """
+
     M = np.zeros((number_of_subjects ,n_roi,n_roi))
 
     # filter out subcortical regions
@@ -244,6 +435,27 @@ def load_subjects_3Dmatrix_mica(path_to_dir,parcellation="glasser360",n_roi=360,
     return M
 
 def load_mica_matrix(parcellation,mode="mean",distances=None):
+    """
+    Load group averaged matrix from Mica-Mics dataset based on
+    averaging method mode.
+
+    Parameters:
+    parcellation (str): string indicating which brain parcellation we
+        want to use, possible options based on downloaded data
+    mode (str): group averaging mode, select an option 
+        from ["simple","cons","dist","rh"]
+            - simple: simple average
+            - cons: consensus thresholding
+            - dist: distance-dependent consensus thresholding
+            - rh: Rosen and Halgren's ageraging method
+    distances (2D np.array): ROI distance matrix, i.e. Euclidean
+        distances of ROIs, necessary for "dist" mode
+
+    Returns:
+    tuple(2D np.array, 2D np.array): 
+        structural connectivity weights, structural connectivity lengths
+    """
+
     if parcellation == "glasser360":
         n_roi= 360
     elif parcellation == "schaefer200":
@@ -271,10 +483,32 @@ def load_mica_matrix(parcellation,mode="mean",distances=None):
 
     return SC_W, SC_L
 
-def load_mica_matrix_for_pytepfit(mode="mean"):
-    parcellation = "schaefer200"
+def load_mica_matrix_for_pytepfit(parcellation="schaefer200",mode="mean",distances=None):
+    """
+    Load group averaged matrix from Mica-Mics dataset based on
+    averaging method mode and reorder for compatibility with
+    TMS-EEG PyTepFit data.
 
-    SC_W, SC_L = load_mica_matrix(parcellation,mode=mode)
+    Parameters:
+    parcellation (str): string indicating which brain parcellation we
+        want to use, it is here only for compatibility and is later 
+        set to schaefer200 no matter what
+    mode (str): group averaging mode, select an option 
+        from ["simple","cons","dist","rh"]
+            - simple: simple average
+            - cons: consensus thresholding
+            - dist: distance-dependent consensus thresholding
+            - rh: Rosen and Halgren's ageraging method
+    distances (2D np.array): ROI distance matrix, i.e. Euclidean
+        distances of ROIs, necessary for "dist" mode
+
+    Returns:
+    tuple(2D np.array, 2D np.array): 
+        structural connectivity weights, structural connectivity lengths
+    """
+    parcellation="schaefer200"
+
+    SC_W, SC_L = load_mica_matrix(parcellation,mode=mode,distances=distances)
 
     mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
 
@@ -288,6 +522,19 @@ def load_mica_matrix_for_pytepfit(mode="mean"):
 # ===================================================================
 
 def load_rosen_halgren(reference_labels=None):
+    """
+    Load structural connectivity matrices (weights and lengths) from PyTepFit dataset
+    and eventually reorder based on reference labels
+    
+    Parameters:
+    reference_labels (list[str]): labels for reordering
+
+    Returns:
+    tuple(2D np.array, 2D np.array)
+        2D numpy array: structural connectivity matrix - weights  
+        2D numpy array: structural connectivity matrix - lengths
+    """
+
     path_sc_w = path('external/rosen_halgren/averageConnectivity_Fpt.mat')
     path_sc_l = path('external/rosen_halgren/averageConnectivity_tractLengths.mat')
     
@@ -309,6 +556,15 @@ def load_rosen_halgren(reference_labels=None):
 # ===================================================================
 
 def load_pytepfit_sc():
+    """
+    Load structural connectivity matrices (weights and lengths) from PyTepFit dataset
+    and reorder based on PyTepFit ROI mapping table to match TMS-EEG ROI ordering.
+
+    Returns:
+    tuple(2D np.array, 2D np.array)
+        2D numpy array: structural connectivity matrix - weights  
+        2D numpy array: structural connectivity matrix - lengths
+    """
     pytepfit_path = 'external/pytepfit/'
     
     SC_W = np.loadtxt(path(pytepfit_path+'Schaefer2018_200Parcels_7Networks_count.csv'))
