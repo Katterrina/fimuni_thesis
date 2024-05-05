@@ -1,6 +1,26 @@
 from src.struct_consensus_netneurotools import *
 
 def create_averaged_matrix_based_on_mode(mode,M,distances=None):
+    """
+    Create group representative average matrix based on 
+    avereging method selcted by mode parameter from options
+    ["simple","cons","dist","rh"].
+        - simple: simple average
+        - cons: consensus thresholding
+        - dist: distance-dependent consensus thresholding
+        - rh: Rosen and Halgren's ageraging method
+
+    Parameters:
+    mode (str): indicator of averaging method, options
+        ["simple","cons","dist","rh"]
+    M (3D numpy array (number_of_subjects,n_roi,n_roi)):
+        structural connectivity matrices for all subjects 
+    distances (2D np.array): ROI distance matrix, i.e. Euclidean
+        distances of ROIs, necessary for "dist" mode
+
+    Returns:
+    2D np.array, group-averaged matrix
+    """
     SC_W = None
 
     if mode == "simple":
@@ -26,6 +46,20 @@ def create_averaged_matrix_based_on_mode(mode,M,distances=None):
     return SC_W
 
 def consensus_thresholding(M,tau=0.5):
+    """
+    Consensus thresholding method for group-averaging structural matrices 
+    stored in 3D input matrix M of shape (number_of_subjects,n_roi,n_roi)
+
+    Parameters: 
+    M (3D numpy array (number_of_subjects,n_roi,n_roi)):
+        structural connectivity matrices for all subjects 
+    tau (float form interval (0,1)): ratio of subjects that are
+        supposed to have an edge ij to keep the edge ij in the group
+        average
+
+    Returns:
+    2D np.array, group-averaged matrix
+    """
     M = np.where(M==0,np.nan,M)
     counts = np.count_nonzero(M,axis=0)
     n_subjects = M.shape[0]
@@ -35,6 +69,17 @@ def consensus_thresholding(M,tau=0.5):
     return SC
 
 def rosenhalgren_sc_averaging(M):
+    """
+    Rosen and Halgren's method for group-averaging structural matrices 
+    stored in 3D input matrix M of shape (number_of_subjects,n_roi,n_roi)
+
+    Parameters:
+    M (3D numpy array (number_of_subjects,n_roi,n_roi)):
+        structural connectivity matrices for all subjects 
+
+    Returns:
+    2D np.array, group-averaged matrix
+    """
     M_mean = np.mean(M,axis=0)
     SC = np.zeros(M_mean.shape)
 
@@ -45,4 +90,15 @@ def rosenhalgren_sc_averaging(M):
     return SC
 
 def simple_averaging(M):
+    """
+    Simple method for group-averaging structural matrices stored in 3D 
+    input matrix M of shape (number_of_subjects,n_roi,n_roi)
+
+    Parameters:
+    M (3D numpy array (number_of_subjects,n_roi,n_roi)):
+        structural connectivity matrices for all subjects 
+
+    Returns:
+    2D np.array, group-averaged matrix
+    """
     return np.mean(M,axis=0)
