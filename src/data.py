@@ -10,6 +10,7 @@ from src.labels import *
 from src.group_averaging import *
 from src.matrix_filtering import *
 from src.save_and_load_averaged import *
+from src.centroids import *
 
 # ===================================================================
 # ======== loading sets of SC matrices for various purposes =========
@@ -19,6 +20,7 @@ def load_matrices_for_specified_preprocessings(matrix_loader,
                                                dataset_name,
                                                parcellation,
                                                ED=None,
+                                               min_streamlines_count=5,
                                                averaging_methods =["simple","cons","dist","rh"]):
     """
     Load a set of matrices from a dataset, one matrix per averaging method specified
@@ -26,7 +28,7 @@ def load_matrices_for_specified_preprocessings(matrix_loader,
 
     Parameters:
     matrix_loader (function): function loading individual matrices based on 
-        paramteters parcellation (str), mode (str, indicates the averaging method),
+        parameters parcellation (str), mode (str, indicates the averaging method),
         and distances (ROI distances in the parcellation, necessary when dist in 
         list of averaging methods) 
     dataset_name (str): string for indication of the data source in the result
@@ -49,12 +51,12 @@ def load_matrices_for_specified_preprocessings(matrix_loader,
     for mode in averaging_methods:
         if mode == "dist" and ED is None:
             continue
-        SC_W, SC_L = matrix_loader(parcellation,mode=mode,distances=ED)
+        SC_W, SC_L = matrix_loader(parcellation=parcellation,min_streamlines_count=min_streamlines_count,mode=mode,distances=ED)
         SC_matrices.append((f"{dataset_name}_{mode}",SC_W, SC_L,np.log(SC_W)))
     
     return SC_matrices
 
-def load_set_of_glasser_matrices_for_ftract(ED=None):
+def load_set_of_glasser_matrices_for_ftract(ED=None,min_streamlines_count=5):
     """
     Load all matrices available in Glasser (MNI-HCP-MMP1) parcellation 
     and reorder them to match the ordering of ROIs in F-TRACT.
@@ -80,7 +82,7 @@ def load_set_of_glasser_matrices_for_ftract(ED=None):
     SC_matrices = []
 
     # Mica-Mics dataset
-    SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix,"Mica-Mics","glasser360",ED)
+    SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix,"Mica-Mics","glasser360",ED,min_streamlines_count=min_streamlines_count)
 
     for name, SC_W, SC_L, SC_W_log in SC_matrices_mica:
         SC_W, SC_L  = keep_val_where_weight(SC_W, SC_L)
@@ -103,7 +105,7 @@ def load_set_of_glasser_matrices_for_ftract(ED=None):
 
     return SC_matrices
 
-def load_set_of_schaefer_matrices_for_pytepfit(ED=None,averaging_methods=None):
+def load_set_of_schaefer_matrices_for_pytepfit(ED=None,averaging_methods=None,min_streamlines_count=5):
     """
     Load all matrices available in Schaefer parcellation and reorder
     them to match the ordering of ROIs in PyTepFit TMS-EEG.
@@ -132,16 +134,16 @@ def load_set_of_schaefer_matrices_for_pytepfit(ED=None,averaging_methods=None):
 
     parcellation = "schaefer200"
     if averaging_methods is None:
-        SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix_for_pytepfit,"Domhof",parcellation,ED)
-        SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix_for_pytepfit,"Mica-Mics",parcellation,ED)
+        SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix_for_pytepfit,"Domhof",parcellation,ED,min_streamlines_count=min_streamlines_count)
+        SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix_for_pytepfit,"Mica-Mics",parcellation,ED,min_streamlines_count=min_streamlines_count)
     else:
         SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix_for_pytepfit,"Domhof",parcellation,ED,
-                                                                        averaging_methods=averaging_methods)
+                                                                        min_streamlines_count=min_streamlines_count,averaging_methods=averaging_methods)
         SC_matrices_mica = load_matrices_for_specified_preprocessings(load_mica_matrix_for_pytepfit,"Mica-Mics",parcellation,ED,
-                                                                        averaging_methods=averaging_methods)
+                                                                        min_streamlines_count=min_streamlines_count,averaging_methods=averaging_methods)
     return SC_matrices+SC_matrices_domhof+SC_matrices_mica
 
-def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=None,ED=None):
+def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=[37,7],ED=None,min_streamlines_count=5):
     """
     Load all matrices available in DeskianKilliany parcellation 
     and reorder them to match the ordering of ROIs in F-TRACT.
@@ -169,7 +171,7 @@ def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=None,ED=None):
     SC_matrices_domhof = load_matrices_for_specified_preprocessings(load_domhof_matrix,
                                                                     "Domhof",
                                                                     "DKT",
-                                                                    ED,
+                                                                    ED,min_streamlines_count=min_streamlines_count,
                                                                     averaging_methods=["simple","cons","rh"])
 
     for name, SC_W_D, SC_L_D, SC_W_log_D in SC_matrices_domhof:
@@ -309,7 +311,7 @@ def load_subjects_3Dmatrix_domhof(path_to_dir,csv_name,n_roi,number_of_subjects=
 
     return M
 
-def load_domhof_matrix(parcellation,mode="mean",distances=None):
+def load_domhof_matrix(parcellation,min_streamlines_count=5,mode="simple",distances=None):
     """
     Load group averaged matrix from Domhof dataset based on
     averaging method mode.
@@ -330,6 +332,7 @@ def load_domhof_matrix(parcellation,mode="mean",distances=None):
     tuple(2D np.array, 2D np.array): 
         structural connectivity weights, structural connectivity lengths
     """
+    print("load domhof")
 
     if parcellation == "DKT":
         n_roi = 70
@@ -338,28 +341,35 @@ def load_domhof_matrix(parcellation,mode="mean",distances=None):
 
     rootdir = f"external/domhof/{parcellation}/"
     scdir = "1StructuralConnectivity/"
-    sc_path_to_dir = path(rootdir+scdir)
+    path_to_dir = path(rootdir+scdir)
 
-    SC_L = load_averaged_matrix(sc_path_to_dir,"mean","SC_L")
-    SC_W = load_averaged_matrix(sc_path_to_dir,mode,"SC_W")
+    matrix_W_name = f"SC_W_min{min_streamlines_count}"
+    matrix_L_name = f"SC_L_min{min_streamlines_count}"
+
+    SC_W = load_averaged_matrix(path_to_dir,mode,matrix_W_name)
+    SC_L = load_averaged_matrix(path_to_dir,mode,matrix_L_name)
     W = None
 
     if SC_W is None:
-        M = load_subjects_3Dmatrix_domhof(sc_path_to_dir,"Counts.csv",n_roi)
-        SC_W = create_averaged_matrix_based_on_mode(mode,M,distances)
-        save_averaged_matrix(SC_W,sc_path_to_dir,mode,"SC_W")
+        W = load_subjects_3Dmatrix_domhof(path_to_dir,"Counts.csv",n_roi)
+        W_nan = np.where(W>min_streamlines_count,W,np.nan)
+        SC_W = create_averaged_matrix_based_on_mode(mode,W_nan,distances)
+        save_averaged_matrix(SC_W,path_to_dir,mode,matrix_W_name)
 
     if SC_L is None:
-        W = load_subjects_3Dmatrix_domhof(sc_path_to_dir,"Counts.csv",n_roi)
-        L = load_subjects_3Dmatrix_domhof(sc_path_to_dir,"Lengths.csv",n_roi)
+        if W is None:
+            W = load_subjects_3Dmatrix_domhof(path_to_dir,"Counts.csv",n_roi)
+        L = load_subjects_3Dmatrix_domhof(path_to_dir,"Lengths.csv",n_roi)
 
-        L_nan = np.where(W>0,L,np.nan)
+        L_nan = np.where(W>min_streamlines_count,L,np.nan)
         SC_L = np.nanmean(L_nan,axis=0)
-        save_averaged_matrix(SC_L,sc_path_to_dir,"mean","SC_L")
+        SC_L = np.where(SC_W>0,SC_L,np.nan)
+
+        save_averaged_matrix(SC_L,path_to_dir,mode,matrix_L_name)
 
     return SC_W, SC_L
 
-def load_domhof_matrix_for_pytepfit(parcellation="schaefer200",mode="mean",distances=None):
+def load_domhof_matrix_for_pytepfit(min_streamlines_count=5,parcellation="schaefer200",mode="simple",distances=None):
     """
     Load group averaged matrix from Domhof dataset based on
     averaging method mode and reorder for compatibility with
@@ -383,7 +393,7 @@ def load_domhof_matrix_for_pytepfit(parcellation="schaefer200",mode="mean",dista
         structural connectivity weights, structural connectivity lengths
     """
 
-    SC_W, SC_L = load_domhof_matrix(parcellation,mode=mode,distances=distances)
+    SC_W, SC_L = load_domhof_matrix(parcellation,min_streamlines_count=min_streamlines_count,mode=mode,distances=distances)
 
     mapping_17 = path('external/schaefer_parcellation_centroids/ROI_MAPPING_7_17.csv')
     mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
@@ -430,11 +440,13 @@ def load_subjects_3Dmatrix_mica(path_to_dir,parcellation="glasser360",n_roi=360,
             c = np.genfromtxt(cf,delimiter=',')
             c = np.take(c,indices=index,axis=0)
             c = np.take(c,indices=index,axis=1)
-            M[i] = c + c.T
+            cT = c.T.copy()
+            np.fill_diagonal(cT,0)
+            M[i] = c + cT
 
     return M
 
-def load_mica_matrix(parcellation,mode="mean",distances=None):
+def load_mica_matrix(parcellation="glasser360",min_streamlines_count=5,mode="simple",distances=None):
     """
     Load group averaged matrix from Mica-Mics dataset based on
     averaging method mode.
@@ -463,27 +475,32 @@ def load_mica_matrix(parcellation,mode="mean",distances=None):
 
     path_to_dir = path(f"external/mica-mics/{parcellation}/")
 
-    SC_L = load_averaged_matrix(path_to_dir,"mean","SC_L")
-    SC_W = load_averaged_matrix(path_to_dir,mode,"SC_W")
+    matrix_W_name = f"SC_W_min{min_streamlines_count}"
+    matrix_L_name = f"SC_L_min{min_streamlines_count}"
+
+    SC_L = load_averaged_matrix(path_to_dir,mode,matrix_L_name)
+    SC_W = load_averaged_matrix(path_to_dir,mode,matrix_W_name)
     W = None
 
     if SC_W is None:
         W = load_subjects_3Dmatrix_mica(path_to_dir,parcellation,n_roi)
-        SC_W = create_averaged_matrix_based_on_mode(mode,W,distances)
-        save_averaged_matrix(SC_W,path_to_dir,mode,"SC_W")
+        W_nan = np.where(W>min_streamlines_count,W,np.nan)
+        SC_W = create_averaged_matrix_based_on_mode(mode,W_nan,distances)
+        save_averaged_matrix(SC_W,path_to_dir,mode,matrix_W_name)
 
     if SC_L is None:
         if W is None:
             W = load_subjects_3Dmatrix_mica(path_to_dir,parcellation,n_roi)
         L = load_subjects_3Dmatrix_mica(path_to_dir,parcellation,n_roi,sc_or_lengths="edgeLength")
 
-        L_nan = np.where(W>0,L,np.nan)
+        L_nan = np.where(W>min_streamlines_count,L,np.nan)
         SC_L = np.nanmean(L_nan,axis=0)
-        save_averaged_matrix(SC_L,path_to_dir,"mean","SC_L")
+        SC_L = np.where(SC_W>0,SC_L,np.nan)
+        save_averaged_matrix(SC_L,path_to_dir,mode,matrix_L_name)
 
     return SC_W, SC_L
 
-def load_mica_matrix_for_pytepfit(parcellation="schaefer200",mode="mean",distances=None):
+def load_mica_matrix_for_pytepfit(min_streamlines_count=5,parcellation="schaefer200",mode="simple",distances=None):
     """
     Load group averaged matrix from Mica-Mics dataset based on
     averaging method mode and reorder for compatibility with
@@ -508,7 +525,7 @@ def load_mica_matrix_for_pytepfit(parcellation="schaefer200",mode="mean",distanc
     """
     parcellation="schaefer200"
 
-    SC_W, SC_L = load_mica_matrix(parcellation,mode=mode,distances=distances)
+    SC_W, SC_L = load_mica_matrix(parcellation,min_streamlines_count=min_streamlines_count,mode=mode,distances=distances)
 
     mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
 
@@ -574,3 +591,20 @@ def load_pytepfit_sc():
 
     mapping_path = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
     return schaefer_to_schaefer(SC_W,mapping_path,"idx_csv"), schaefer_to_schaefer(SC_L,mapping_path,"idx_csv")
+
+# ===================================================================
+# ==================== Create new structural matrices ===============
+# ===================================================================
+
+if __name__ == "__main__":
+    print("DKT")
+    ED = dkt_roi_distances()
+    SC_matrices = load_set_of_DKT_matrices_for_ftract(ED=ED)
+
+    print("Glasser")
+    ED = glasser_roi_distances()
+    SC_matrices = load_set_of_glasser_matrices_for_ftract(ED=ED)
+
+    print("Schaefer")
+    ED = schaefer_roi_distances()
+    SC_matrices = load_set_of_schaefer_matrices_for_pytepfit(ED=ED)  

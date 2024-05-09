@@ -13,7 +13,7 @@ def find_pivot_to_keep_xpercent_edges(matrix,percent=0.85):
     float: threshold
     """
     n_roi = matrix.shape[0]
-    pivot_id = int((n_roi**2)*percent)
+    pivot_id = int((n_roi**2)*(1-percent))
     matrix_flat_sorted = np.sort(np.nan_to_num(matrix.flatten()))
     return matrix_flat_sorted[pivot_id]
 

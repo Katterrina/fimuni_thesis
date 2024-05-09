@@ -29,23 +29,22 @@ def create_averaged_matrix_based_on_mode(mode,M,distances=None):
         if distances is None:
             print(f"Node distances necessary to calculate distance dependent thresholding!")
         else:
-            M = np.transpose(M)
-            SC_W = struct_consensus(M,distances,weighted=True)
+            SC_W = struct_consensus(np.transpose(M),distances,weighted=True)
     elif mode == "rh":
         SC_W = rosenhalgren_sc_averaging(M)
     elif mode == "cons":
-        SC_W = consensus_thresholding(M,tau=0.75)
+        SC_W = consensus_thresholding(M)
     else:
         print("Invalid mode!")
 
     # we do not consider directed edges, so the resulting matrix should be symmetric
     # it is not always the case because of numerical instability, so we enforce symetry here
     SC_W = (SC_W+SC_W.T) /2 
-
+    
     np.fill_diagonal(SC_W,np.nan)
     return SC_W
 
-def consensus_thresholding(M,tau=0.5):
+def consensus_thresholding(M,tau=0.75):
     """
     Consensus thresholding method for group-averaging structural matrices 
     stored in 3D input matrix M of shape (number_of_subjects,n_roi,n_roi)
@@ -60,7 +59,7 @@ def consensus_thresholding(M,tau=0.5):
     Returns:
     2D np.array, group-averaged matrix
     """
-    M = np.where(M==0,np.nan,M)
+    
     counts = np.count_nonzero(M,axis=0)
     n_subjects = M.shape[0]
     frac = counts / n_subjects
@@ -80,12 +79,12 @@ def rosenhalgren_sc_averaging(M):
     Returns:
     2D np.array, group-averaged matrix
     """
-    M_mean = np.mean(M,axis=0)
+    M_mean = np.nanmean(M,axis=0)
     SC = np.zeros(M_mean.shape)
 
     for i in range(M_mean.shape[0]):
         for j in range(M_mean.shape[1]):
-            SC[i][j] = M_mean[i][j] / (np.sum(M_mean[i,:]) + np.sum(M_mean[:,j]) - M_mean[i][i] - M_mean[j][j])
+            SC[i][j] = M_mean[i][j] / (np.nansum(M_mean[i,:]) + np.nansum(M_mean[:,j]) - M_mean[i][i] - M_mean[j][j])
 
     return SC
 
@@ -101,4 +100,5 @@ def simple_averaging(M):
     Returns:
     2D np.array, group-averaged matrix
     """
-    return np.mean(M,axis=0)
+    M = np.nan_to_num(M,nan=0)
+    return np.nanmean(M,axis=0)
