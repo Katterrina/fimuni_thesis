@@ -64,6 +64,8 @@ def load_set_of_glasser_matrices_for_ftract(ED=None,min_streamlines_count=5):
     Parameters:
     ED (2D np.array): matrix of Euclidean distances of ROI in Glasser parcellation
         ordered by F-TRACT labels
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
 
     Returns:
     list[(str, 2D np.array, 2D np.array, 2D np.array)]: 
@@ -115,6 +117,8 @@ def load_set_of_schaefer_matrices_for_pytepfit(ED=None,averaging_methods=None,mi
         ordered by F-TRACT labels
     averaging_methods (list[str]): list of averaging methods we want to load,
         possible options ["simple","cons","dist","rh"], used when dataset allows
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
 
     Returns:
     list[(str, 2D np.array, 2D np.array, 2D np.array)]: 
@@ -157,6 +161,8 @@ def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=[37,7],ED=None,min_
         should be deleted were found ad hoc)
     ED (2D np.array): matrix of Euclidean distances of ROI in Glasser parcellation
         ordered by F-TRACT labels
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
 
     Returns:
     list[(str, 2D np.array, 2D np.array, 2D np.array)]: 
@@ -319,6 +325,8 @@ def load_domhof_matrix(parcellation,min_streamlines_count=5,mode="simple",distan
     Parameters:
     parcellation (str): string indicating which brain parcellation we
         want to use, possible options based on downloaded data
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
     mode (str): group averaging mode, select an option 
         from ["simple","cons","dist","rh"]
             - simple: simple average
@@ -332,8 +340,6 @@ def load_domhof_matrix(parcellation,min_streamlines_count=5,mode="simple",distan
     tuple(2D np.array, 2D np.array): 
         structural connectivity weights, structural connectivity lengths
     """
-    print("load domhof")
-
     if parcellation == "DKT":
         n_roi = 70
     elif parcellation == "schaefer200":
@@ -376,6 +382,8 @@ def load_domhof_matrix_for_pytepfit(min_streamlines_count=5,parcellation="schaef
     TMS-EEG PyTepFit data.
 
     Parameters:
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
     parcellation (str): string indicating which brain parcellation we
         want to use, it is here only for compatibility and is later 
         set to schaefer200 no matter what
@@ -454,6 +462,8 @@ def load_mica_matrix(parcellation="glasser360",min_streamlines_count=5,mode="sim
     Parameters:
     parcellation (str): string indicating which brain parcellation we
         want to use, possible options based on downloaded data
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
     mode (str): group averaging mode, select an option 
         from ["simple","cons","dist","rh"]
             - simple: simple average
@@ -507,6 +517,8 @@ def load_mica_matrix_for_pytepfit(min_streamlines_count=5,parcellation="schaefer
     TMS-EEG PyTepFit data.
 
     Parameters:
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
     parcellation (str): string indicating which brain parcellation we
         want to use, it is here only for compatibility and is later 
         set to schaefer200 no matter what
