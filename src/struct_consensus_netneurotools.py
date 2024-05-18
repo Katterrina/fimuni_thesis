@@ -1,5 +1,6 @@
 # this code is adopted from netneorotools github, it is not imported with
 # the rest of netneurotools package because we wanted to experiment with it
+
 import numpy as np
 
 def struct_consensus(data, distance, hemiid=None,

@@ -4,7 +4,7 @@ Here we document how to obtain the external datasets used in the project. For ea
 
 ## F-TRACT dataset
 
-Availible on EBRAINS in several versions, here we use the latest F-TRACT_P_11_v2307 (responses until 200ms). We use DKT and MNI-HCP-MMP1 parcellations.
+Availible on EBRAINS in several versions, here we use the latest F-TRACT_P_11_v2307 (responses until 200 ms) and F-TRACT_P_01_v2307 (50 ms). We use DKT and MNI-HCP-MMP1 parcellations.
 
 Jedynak, M., Boyer, A., Lemaréchal, J.-D., Trebaul, L., Tadel, F., Bhattacharjee, M., Chanteloup-Forêt, B., Deman, P., Tuyisenge, V., Ayoubian, L., Hugues, E., Saubat-Guigui, C., Zouglech, R., Reyes-Mejia, G. C., Tourbier, S., Hagmann, P., Adam, C., Barba, C., Bartolomei, F., … F-TRACT Consortium. (2023). F-TRACT: a probabilistic atlas of anatomo-functional connectivity of the human brain (F-TRACT_P_01_v2307) [Data set]. EBRAINS. https://doi.org/10.25493/5AM4-J3F
 
@@ -15,7 +15,13 @@ F-TRACT
 │   └── <parcellation>.txt			# list of ROI names in the order that is used in the matrices
 │   └── probability.txt.gz			# matrix of response probabilities, one row per stimulated ROI
 │   └── amplitude__median.txt.gz	# matrix of response median amplitudes, one row per stimulated ROI
+│   └── onset_delay__median.txt.gz	# matrix of response onset delays, one row per stimulated ROI
+│   └── peak_delay__median.txt.gz	# matrix of response peak delays, one row per stimulated ROI
+│   └── N_implantations.txt.gz	    # matrix of implantations, m_ij denoted how many times were electrodes implantet to both i and j
+│   └── N_stimulations.txt.gz	    # matrix of stimulations, m_ij denoted how many times respones was recorded at j while i was stimulated
 │   ....
+└── ....
+F-TRACT_short                       # same structure, 50 ms responses
 └── ....
 ```
 
@@ -48,16 +54,30 @@ Royer, J., Rodriguez-Cruces, R., Tavakol, S., Lariviere, S., Herholz, P., Li, Q.
 
 Downloaded using datalad with this sequence of commands:
 ```
-TODO
+datalad install https://github.com/CONP-PCNO/conp-dataset.git
+cd conp-dataset
+datalad install projects/mica-mics
+cd projects/mica-mics/MICs_release/derivatives/micapipe
+datalad get */ses-01/dwi/*glasser360*.txt
+cp */ses-01/dwi/*<parcellation><number of ROIs>*.txt <path_to_my_mica_dir>/<parcellation><number of ROIs>/
 ```
+
+Annotations downloaded form GitHub: https://github.com/MICA-MNI/micapipe/blob/master/parcellations/
 
 ```
 mica-mics
-├── sc_<parcellation><number of ROIs>
+├── <parcellation><number of ROIs>
 │   └── sub-HC<subject number xxx>_ses-01_space-dwinative_atlas-<parcellation><number of ROIs>_desc-edgeLength.txt	# edge length matrix for subject xxx
 │   └── sub-HC<subject number xxx>_ses-01_space-dwinative_atlas-<parcellation><number of ROIs>_desc-sc.txt			# structural connectivity matrix for subject xxx
+|   └── ....
+├── schaefer200_annot
+|   └── lh.schaefer-200_mics.annot # download from https://github.com/MICA-MNI/micapipe/blob/master/parcellations/lh.schaefer-200_mics.annot
+|   └── rh.schaefer-200_mics.annot # download from https://github.com/MICA-MNI/micapipe/blob/master/parcellations/rh.schaefer-200_mics.annot
 └── ....
 ```
+
+
+
 
 ## Domhof dataset
 
@@ -77,7 +97,5 @@ domhof
 └── ....
 ```
 
+# Other external resources
 
-## K roztřízení:
-
-https://github.com/MICA-MNI/micapipe/blob/master/parcellations/rh.schaefer-200_mics.annot

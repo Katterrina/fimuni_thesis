@@ -1,6 +1,4 @@
 from netneurotools import metrics
-    # https://netneurotools.readthedocs.io/en/latest/, pip install netneurotools does not work for me
-    # I downloaded the repository and I am using the local copy
 import numpy as np
 
 def calculate_communicatin_metrics(ED,SC_L,SC_W):

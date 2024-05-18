@@ -105,7 +105,7 @@ def schaefer_roi_distances():
     Returns:
     2D np.array of shape (n_roi,n_roi): distances between all pair of ROIs
     """
-    centroids_file = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+    centroids_file = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
     centroids_mne = get_centroids_from_file(centroids_file,"geom_mne")
     distance_matrix = roi_distances_from_centroids(centroids_mne)
 

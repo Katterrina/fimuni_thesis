@@ -280,7 +280,7 @@ def load_enigma_sc_matrix(parcellation=None,reoreder=None):
         SC, _, _, _ = load_sc(parcellation=parcellation)
 
     if reoreder=='PyTepFit':
-        mapping_path = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+        mapping_path = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
         SC = schaefer_to_schaefer(SC,mapping_path,"idx_csv")       
 
     return SC 
@@ -403,8 +403,8 @@ def load_domhof_matrix_for_pytepfit(min_streamlines_count=5,parcellation="schaef
 
     SC_W, SC_L = load_domhof_matrix(parcellation,min_streamlines_count=min_streamlines_count,mode=mode,distances=distances)
 
-    mapping_17 = path('external/schaefer_parcellation_centroids/ROI_MAPPING_7_17.csv')
-    mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+    mapping_17 = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_7_17.csv')
+    mapping_csv = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
 
     SC_W = schaefer_to_schaefer(schaefer_to_schaefer(SC_W,mapping_17,"idx_17"),mapping_csv,"idx_csv")
     SC_L = schaefer_to_schaefer(schaefer_to_schaefer(SC_L,mapping_17,"idx_17"),mapping_csv,"idx_csv")
@@ -539,7 +539,7 @@ def load_mica_matrix_for_pytepfit(min_streamlines_count=5,parcellation="schaefer
 
     SC_W, SC_L = load_mica_matrix(parcellation,min_streamlines_count=min_streamlines_count,mode=mode,distances=distances)
 
-    mapping_csv = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+    mapping_csv = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
 
     SC_W = schaefer_to_schaefer(SC_W,mapping_csv,"idx_csv")
     SC_L = schaefer_to_schaefer(SC_L,mapping_csv,"idx_csv")
@@ -601,7 +601,7 @@ def load_pytepfit_sc():
 
     SC_L = np.where(SC_W == 0,np.nan,SC_L)
 
-    mapping_path = path('external/schaefer_parcellation_centroids/ROI_MAPPING_pytepfit.csv')
+    mapping_path = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
     return schaefer_to_schaefer(SC_W,mapping_path,"idx_csv"), schaefer_to_schaefer(SC_L,mapping_path,"idx_csv")
 
 # ===================================================================

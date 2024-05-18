@@ -1,10 +1,6 @@
-data_ukazka/
 data/external
-clanky/
 __venv__/
 .ipynb_checkpoints/
 src/__pycache__/
 figures/
-ENIGMA/
-netneurotools/
 src.egg-info/
