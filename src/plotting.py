@@ -8,6 +8,19 @@ import numpy as np
 
 COLOR_MAPPING_YEO = {'Default':'yellow', 'Limbic':'blue','SalVentAttn':'red',  'DorsAttn':'green','Vis':'purple','Cont':'orange', 'SomMot':'pink'}
 
+def plot_results_per_roi(rpr,fig_dir,title=None):
+    plt.figure(figsize=(7,7))
+    
+    ax = sns.boxplot(data=rpr, x="Y", y="r_sigf", hue="dataset")
+    ax.set_title(title) 
+    ax.set_ylim(bottom=-1, top=1)
+    ax.tick_params(axis='x', rotation=90)
+    plt.xlabel('Communication metric')
+    plt.ylabel('Correlation coefficient')
+    title_save = (title.replace("\n","_")).replace(" ","_")
+    plt.savefig(f'{path_figures(fig_dir+title_save)}.pdf')
+    plt.show()
+
 def plot_results(d,title):
     plt.figure(figsize=(7,10))
     
@@ -20,6 +33,7 @@ def plot_results(d,title):
     plt.ylabel('Correlation coefficient')
 
     plt.show()
+
 
 def plot_results_overlay(d,d_partial,title,fig_dir=None,figsize=(7,10)):
     plt.figure(figsize=figsize)
