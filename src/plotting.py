@@ -6,6 +6,8 @@ from src.paths import *
 from src.data import get_labels_from_file
 import numpy as np
 
+from matplotlib.colors import LinearSegmentedColormap
+
 COLOR_MAPPING_YEO = {'Default':'yellow', 'Limbic':'blue','SalVentAttn':'red',  'DorsAttn':'green','Vis':'purple','Cont':'orange', 'SomMot':'pink'}
 
 def plot_results_per_roi(rpr,fig_dir,title=None):
@@ -186,3 +188,91 @@ def plot_structural_matrices_weight_lengths(SC_matrices,fig_dir,parcellation):
 
 
     plt.savefig(path_figures(fig_dir+"sc_matrices.pdf"))
+
+def plot_tmseeg_data(data,colors=None,title=None,stimulation_time=None):
+    plt.rcParams['figure.figsize'] = [10, 5]
+    fig,ax = plt.subplots()
+    if colors:
+        for i,d in enumerate(data.T):
+            ax.plot(d,color=colors[i], alpha=0.7,)
+        ax.legend(handles=yeo_legend_patches(),loc='upper left', ncols=1,bbox_to_anchor=(0,-0.05,1,1))
+    else:
+        ax.plot(data, alpha=0.7)
+    plt.xlabel("time [ms]")
+    plt.ylabel("EEG [au]")
+    if stimulation_time:
+        ax.axvline(stimulation_time, ymin=np.min(data), ymax=np.max(data),ls=":",label="stimulation time",color="k")
+    plt.title(title)
+    
+
+def plot_one_roi_from_tmseeg_data(data,roi_id,labels,title=None,constants_h=[],constants_v=[]):
+    plt.rcParams['figure.figsize'] = [10, 5]
+    plt.figure()
+    plt.plot(data[:,roi_id])
+    for c in constants_h:
+        plt.plot([c]*data.shape[0],color="k")
+    for c in constants_v:
+        plt.vlines(c, np.min(data), np.max(data),color="k")
+    plt.title(labels[roi_id])
+    plt.xlabel("ms")
+    plt.show()
+
+def plot_one_roi_response_definitions(selected_curve,label,peak_analysis_result,thr,resp_length,fig_dir):
+
+    amp_id, amp, amp_h_id, amp_h = peak_analysis_result
+
+    auc_color = '#FBC15E'
+    first_peak_color = '#348ABD'
+    highest_peak_color = '#E24A33'
+
+    plt.subplots(figsize=(10,5))
+
+    plt.plot(selected_curve,color=auc_color)
+    plt.fill_between([i for i in range(len(selected_curve))],selected_curve,alpha=0.15,color=auc_color)
+    plt.text(resp_length-20, 2, "AUC",color=auc_color,fontsize=20)
+
+    plt.vlines(amp_id, 0, amp,color=first_peak_color)
+    plt.text(amp_id+1, amp+0.5, f"first_peak = {amp:.2f}",color=first_peak_color)
+    plt.plot([1]*(amp_id+1),color=first_peak_color,ls="--")
+    plt.text(amp_id+1, 1+0.3, f"first_peak_time = {amp_id}",color=first_peak_color)
+
+    plt.vlines(amp_h_id, 0, amp_h,color=highest_peak_color)
+    plt.text(amp_h_id+1, amp_h+0.5, f"highest_peak = {amp_h:.2f}",color=highest_peak_color)
+    plt.plot([4]*(amp_h_id+1),color=highest_peak_color,ls="--")
+    plt.text(amp_h_id+1, 4+0.3, f"highest_peak_time = {amp_h_id}",color=highest_peak_color)
+
+    ax = plt.gca()
+    ax.set_ylim([0,amp_h+3])
+    ax.set_xlim([0, len(selected_curve)])
+
+    
+    plt.title(f"ROI identifier: {label}")
+    plt.plot([thr]*len(selected_curve),color="k",ls=":")
+    plt.text(len(selected_curve)-5, thr+0.3, f"threshold = {thr}",color='k',horizontalalignment='right')
+    plt.xlabel("time [ms]")
+    plt.ylabel("EEG [au]")
+    
+    path = path_figures(fig_dir+label+"_response_def.pdf")
+    plt.savefig(path,bbox_inches='tight',pad_inches=0)
+    plt.show()
+
+def plot_df_as_heatmap(df,x_axis,y_axis,value,fig_dir=None,x_label="threshold",y_label="",p=None,title=None,ax=None):
+    plt.figure(figsize=(8,8))
+    pivot = df.pivot_table(index=x_axis, columns=y_axis, values=value,sort=False)
+    if p is not None:
+        pivot_p = df.pivot_table(index=x_axis, columns=y_axis, values=p,sort=False)
+        pivot = pivot.where(pivot_p < 0.05)
+
+    cmap = LinearSegmentedColormap.from_list('', ['#FF2200', 'white', '#FF2200'])# 'seismic'
+
+    if ax is not None:
+        sns.heatmap(pivot, annot=True,center=0,cmap=cmap,vmin=-1, vmax=1,ax=ax,square=True,cbar=False)
+    else:
+        ax = sns.heatmap(pivot, annot=True,center=0,cmap=cmap,vmin=-1, vmax=1,ax=ax,square=True,cbar=False)
+    ax.set_title(title)
+    ax.set(xlabel=x_label)
+    ax.set(ylabel=y_label)
+    plt.yticks(rotation=0) 
+    if fig_dir is not None:
+        plt.savefig(path_figures(fig_dir+title+".pdf"),bbox_inches='tight',pad_inches=0)
+    plt.show()
