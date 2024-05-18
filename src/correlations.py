@@ -16,10 +16,10 @@ def partial_corr_ED(d,x,method):
     return pd.concat(result)
 
 def abs_r_to_dataframe(df):
-    df['abs'] = df['r'].apply(abs)
+    df['r_abs'] = df['r'].apply(abs)
 
 def sigf_sign_to_dataframe(df):
     if 'p-unc' in df.columns:
         df['p_sigf'] = df['p-unc'].apply(lambda x: "*" if x< 0.05 else "")
-    elif'p-unc' in df.columns:
+    elif'p-val' in df.columns:
         df['p_sigf'] = df['p-val'].apply(lambda x: "*" if x< 0.05 else "")
