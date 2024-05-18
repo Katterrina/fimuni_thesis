@@ -85,6 +85,18 @@ def glasser_roi_distances(ftract_labels=None):
 
     return distance_matrix
 
+def load_dkt_centroids():
+    """
+    Load coordinates of ROI centroids for DeskianKilliany parcellation.
+
+    Returns:
+    centroids (2D np.array of shape (n_roi,3)): coordinates for each ROI
+    """
+    file = path("external/dk_parcellation_centroids/dk_centroids.csv")
+    centroids = get_centroids_from_file(file,"geom")
+
+    return centroids
+
 def dkt_roi_distances():
     """
     Load matrix of Euclidean distances for ROIs in DeskianKilliany parcellation.
@@ -92,11 +104,26 @@ def dkt_roi_distances():
     Returns:
     2D np.array of shape (n_roi,n_roi): distances between all pair of ROIs
     """
-    file = path("external/dk_parcellation_centroids/dk_centroids.csv")
-    centroids = get_centroids_from_file(file,"geom")
+    centroids = load_dkt_centroids()
     distance_matrix = roi_distances_from_centroids(centroids)
 
     return distance_matrix
+
+def load_schaefer_centroids(mne_or_csv="csv"):
+    """
+    Load coordinates of ROI centroids for Schaefer200 parcellation.
+
+    Parameters:
+    mne_or_csv (str): csv or mne indicating the version of centroids 
+        we want to load
+
+    Returns:
+    centroids (2D np.array of shape (n_roi,3)): coordinates for each ROI
+    """
+    centroids_file = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
+    centroids = get_centroids_from_file(centroids_file,f"geom_{mne_or_csv}")
+
+    return centroids
 
 def schaefer_roi_distances():
     """
@@ -105,8 +132,8 @@ def schaefer_roi_distances():
     Returns:
     2D np.array of shape (n_roi,n_roi): distances between all pair of ROIs
     """
-    centroids_file = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
-    centroids_mne = get_centroids_from_file(centroids_file,"geom_mne")
+    
+    centroids_mne = load_schaefer_centroids("mne")
     distance_matrix = roi_distances_from_centroids(centroids_mne)
 
     return distance_matrix

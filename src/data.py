@@ -147,22 +147,22 @@ def load_set_of_schaefer_matrices_for_pytepfit(ED=None,averaging_methods=None,mi
                                                                         min_streamlines_count=min_streamlines_count,averaging_methods=averaging_methods)
     return SC_matrices+SC_matrices_domhof+SC_matrices_mica
 
-def load_set_of_DKT_matrices_for_ftract(ids_to_delete_in_dkt=[37,7],ED=None,min_streamlines_count=5):
+def load_set_of_DKT_matrices_for_ftract(ED=None,min_streamlines_count=5,ids_to_delete_in_dkt=[37,7]):
     """
     Load all matrices available in DeskianKilliany parcellation 
     and reorder them to match the ordering of ROIs in F-TRACT.
 
     Parameters:
+    ED (2D np.array): matrix of Euclidean distances of ROI in Glasser parcellation
+        ordered by F-TRACT labels
+    min_streamlines_count (int): minimal number of streamlines between two ROIs
+        in one subject to assume that there is an edge connecting them
     ids_to_delete_in_dkt (list[str]): we found that some datasets indicate 
         that they use DeskianKilliany parcellation, which is supposed to 
         have 68 ROIs, but the mshape of matrices is 70x70, therefore it is 
         necessary to remove two ROIs to have those matrices compatible with 
         the rest, which really has the shape 68x68 (specific indeces that 
         should be deleted were found ad hoc)
-    ED (2D np.array): matrix of Euclidean distances of ROI in Glasser parcellation
-        ordered by F-TRACT labels
-    min_streamlines_count (int): minimal number of streamlines between two ROIs
-        in one subject to assume that there is an edge connecting them
 
     Returns:
     list[(str, 2D np.array, 2D np.array, 2D np.array)]: 

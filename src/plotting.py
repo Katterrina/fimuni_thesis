@@ -1,8 +1,12 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.offsetbox import AnchoredText
+import matplotlib.patches as mpatches
 from src.paths import *
+from src.data import get_labels_from_file
 import numpy as np
+
+COLOR_MAPPING_YEO = {'Default':'yellow', 'Limbic':'blue','SalVentAttn':'red',  'DorsAttn':'green','Vis':'purple','Cont':'orange', 'SomMot':'pink'}
 
 def plot_results(d,title):
     plt.figure(figsize=(7,10))
@@ -96,3 +100,75 @@ def plot_one_barcode(ax,data,title=None):
           interpolation='nearest')
     ax.set_title(f"  {title}", loc="right", y=0, ha="left", va="center")
     ax.set_yticks([])
+
+def plot_adjacency_matrix(matrix,ax,title,subnets_idx=False,norm=None,mask=None):
+
+    g =sns.heatmap(matrix,ax=ax,square=True,cbar=False,yticklabels=False, xticklabels=False,cmap='gray',norm=norm,mask=mask)
+    g.set_facecolor('k')
+    ax.set_title(title)
+
+    if subnets_idx:
+        subnet_0,id_start_0 = subnets_idx[0]
+        for subnet,id_start in subnets_idx[1:]:
+            ax.add_patch(mpatches.Rectangle((id_start_0, id_start_0),
+                                              id_start-id_start_0, # Width
+                                              id_start-id_start_0, # Height
+                                              facecolor="none",
+                                              edgecolor=COLOR_MAPPING_YEO[subnet_0],
+                                              linewidth=1))
+            subnet_0,id_start_0 = subnet,id_start
+
+        ax.add_patch(mpatches.Rectangle((id_start_0, id_start_0),
+                                              200-id_start_0, # Width
+                                              200-id_start_0, # Height
+                                              facecolor="none",
+                                              edgecolor=COLOR_MAPPING_YEO[subnet_0],
+                                              linewidth=1))
+
+def yeo_legend_patches():
+    legend_patches = []
+    for c in COLOR_MAPPING_YEO:
+        legend_patches.append(mpatches.Patch(color=COLOR_MAPPING_YEO[c], label=c))
+
+    return legend_patches
+
+def plot_structural_matrices_weight_lengths(SC_matrices,fig_dir,parcellation):
+    number_of_SC = len(SC_matrices)
+    plt.style.use('seaborn-v0_8-white')
+    fig, axs = plt.subplots(2,number_of_SC, figsize=(4*number_of_SC,8),tight_layout=True,sharex=True,sharey=True)
+
+    idx_by_yeonet = False
+
+    if parcellation=="schaefer":
+        centroids_file = path('interim/schaefer_parcellation_mappings/ROI_MAPPING_pytepfit.csv')
+        
+        idx_by_yeonet = []
+        ROI_colors = []
+
+        legend_patches = yeo_legend_patches()
+
+        labels = get_labels_from_file(centroids_file,"roi_name")
+
+        network = None
+        for i,l in enumerate(labels):
+            n = l.split('_')[2]
+            ROI_colors.append(COLOR_MAPPING_YEO[n])
+            if n != network:
+                idx_by_yeonet.append((n,i))
+                network = n
+
+        fig.legend(handles=legend_patches,loc='lower center', ncols=7,bbox_to_anchor=(0,-0.05,1,1))
+
+    for i in range(number_of_SC):
+        name, SC_W, SC_L, SC_W_log = SC_matrices[i]
+
+        plot_adjacency_matrix(SC_W_log,axs[0,i],f"SC {name} - weights (log)",subnets_idx=idx_by_yeonet,mask=SC_W==0)
+
+        if SC_L is not None:
+            plot_adjacency_matrix(SC_L,axs[1,i],f"SC {name} - lengths",subnets_idx=idx_by_yeonet,mask=SC_W==0)
+    
+        else:
+            plot_adjacency_matrix(np.zeros(SC_W.shape),axs[1,i],f"SC {name} - NO lengths",subnets_idx=idx_by_yeonet,mask=SC_W==0)
+
+
+    plt.savefig(path_figures(fig_dir+"sc_matrices.pdf"))

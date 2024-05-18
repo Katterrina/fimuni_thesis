@@ -50,3 +50,21 @@ def keep_val_where_weight(SC_W,SC_L):
     SC_L = np.where(np.isnan(SC_W),np.nan,SC_L) # keep lengths only for edges where is connection (based on weights)
     np.nan_to_num(SC_W, copy=False) # convert nan to 0, because the metrics can not handle nans
     return SC_W,SC_L
+
+
+def filter_matrices_based_on_density(SC_matrices,graph_density):
+    
+    SC_matrices_filtered = []
+
+    for i, stat_data in enumerate(SC_matrices):
+        name, SC_W, SC_L, SC_W_log = stat_data
+        pivot = find_pivot_to_keep_xpercent_edges(SC_W,graph_density)
+        SC_W = np.where(SC_W>=pivot,SC_W,np.nan)
+        np.fill_diagonal(SC_W,0)
+        np.nan_to_num(SC_W,nan=0,copy=False)
+        if SC_L is not None:
+            SC_L = np.where(SC_W>=pivot,SC_L,np.nan)
+        SC_W_log = np.where(SC_W>=pivot,SC_W_log,np.nan)
+        SC_matrices_filtered.append((name, SC_W, SC_L, SC_W_log))
+
+    return SC_matrices_filtered
