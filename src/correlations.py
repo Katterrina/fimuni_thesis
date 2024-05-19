@@ -3,6 +3,10 @@ import numpy as np
 import pingouin as pg
 
 def partial_corr_ED(d,x,method):
+    """
+    Calculate partial correlations with influence of of column ED controlled for all 
+    columns in dataframe d (except of x) with column x. Method spearman/pearson.
+    """
     result = []
     result.append(pd.DataFrame({"n":[0],"r":[0],"CI95%":[None],"p-val":[1],"Y":["ED"]})) # just to have fitting images
 
