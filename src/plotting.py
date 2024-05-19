@@ -5,6 +5,7 @@ import matplotlib.patches as mpatches
 from src.paths import *
 from src.data import get_labels_from_file
 import numpy as np
+from adjustText import adjust_text
 
 from matplotlib.colors import LinearSegmentedColormap
 
@@ -276,3 +277,48 @@ def plot_df_as_heatmap(df,x_axis,y_axis,value,fig_dir=None,x_label="threshold",y
     if fig_dir is not None:
         plt.savefig(path_figures(fig_dir+title+".pdf"),bbox_inches='tight',pad_inches=0)
     plt.show()
+
+
+
+def scatter_two_columns_from_dataframe(df,col1,col2,label,log_axes=False,labels=False,corr_line=None,title=None,labelx=None,labely=None,fig_dir=None):
+    a1 = np.array(df[col1])
+    a2 = np.array(df[col2])
+        
+    plt.style.use('ggplot')
+    fig,ax = plt.subplots(figsize=(7,7))
+
+    if corr_line:
+        ax.plot(corr_line[0],corr_line[1],c="gray")
+    
+    ax.scatter(a1,a2,c=df["color7"])
+    ax.legend(handles=yeo_legend_patches())
+
+    ax.set_xlabel(col1+"_F-Tract")
+    ax.set_ylabel(col2)
+
+
+    if log_axes:
+        ax.set_yscale('log')
+        ax.set_xscale('log')
+    
+    if labels and not log_axes:
+        texts = []
+
+        for i, coor in enumerate(zip(a1,a2)):
+            x,y = coor
+            if np.isnan(x) or np.isnan(y):
+                continue
+
+            texts.append(ax.text(x,y,df[label][i],fontsize='x-small'))
+
+        adjust_text(texts, force_text=(0.5,0.5),expand=(1.2,1.2),expand_axes=True,time_lim=5,arrowprops=dict(arrowstyle='-', color='black', lw=0.5))
+    
+    if labely:
+        plt.ylabel(labely)
+    if labelx:
+        plt.xlabel(labelx)
+
+    if title and fig_dir is not None:
+        plt.title(title)
+        title_save = (title.replace(" ","_")).replace("\n","_")
+        plt.savefig(path_figures(fig_dir+title_save),bbox_inches='tight',pad_inches=0)
