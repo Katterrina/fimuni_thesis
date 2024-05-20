@@ -11,6 +11,13 @@ from matplotlib.colors import LinearSegmentedColormap
 
 COLOR_MAPPING_YEO = {'Default':'yellow', 'Limbic':'blue','SalVentAttn':'red',  'DorsAttn':'green','Vis':'purple','Cont':'orange', 'SomMot':'pink'}
 
+def yeo_legend_patches():
+    legend_patches = []
+    for c in COLOR_MAPPING_YEO:
+        legend_patches.append(mpatches.Patch(color=COLOR_MAPPING_YEO[c], label=c))
+
+    return legend_patches
+
 def plot_results_per_roi(rpr,fig_dir,title=None):
     plt.figure(figsize=(7,7))
     
@@ -141,13 +148,6 @@ def plot_adjacency_matrix(matrix,ax,title,subnets_idx=False,norm=None,mask=None)
                                               facecolor="none",
                                               edgecolor=COLOR_MAPPING_YEO[subnet_0],
                                               linewidth=1))
-
-def yeo_legend_patches():
-    legend_patches = []
-    for c in COLOR_MAPPING_YEO:
-        legend_patches.append(mpatches.Patch(color=COLOR_MAPPING_YEO[c], label=c))
-
-    return legend_patches
 
 def plot_structural_matrices_weight_lengths(SC_matrices,fig_dir,parcellation):
     number_of_SC = len(SC_matrices)
