@@ -235,12 +235,12 @@ def plot_one_roi_response_definitions(selected_curve,label,peak_analysis_result,
     plt.vlines(amp_id, 0, amp,color=first_peak_color)
     plt.text(amp_id+1, amp+0.5, f"first_peak = {amp:.2f}",color=first_peak_color)
     plt.plot([1]*(amp_id+1),color=first_peak_color,ls="--")
-    plt.text(amp_id+1, 1+0.3, f"first_peak_time = {amp_id}",color=first_peak_color)
+    plt.text(amp_id+1, 1+0.3, f"first_peak_latency = {amp_id}",color=first_peak_color)
 
     plt.vlines(amp_h_id, 0, amp_h,color=highest_peak_color)
     plt.text(amp_h_id+1, amp_h+0.5, f"highest_peak = {amp_h:.2f}",color=highest_peak_color)
     plt.plot([4]*(amp_h_id+1),color=highest_peak_color,ls="--")
-    plt.text(amp_h_id+1, 4+0.3, f"highest_peak_time = {amp_h_id}",color=highest_peak_color)
+    plt.text(amp_h_id+1, 4+0.3, f"highest_peak_latency = {amp_h_id}",color=highest_peak_color)
 
     ax = plt.gca()
     ax.set_ylim([0,amp_h+3])

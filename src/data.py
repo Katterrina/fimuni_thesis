@@ -3,6 +3,7 @@ import h5py
 import numpy as np
 import pandas as pd
 import logging
+import warnings
 
 from src.roi_remappnig import *
 from src.paths import *
@@ -52,7 +53,10 @@ def load_matrices_for_specified_preprocessings(matrix_loader,
         if mode == "dist" and ED is None:
             continue
         SC_W, SC_L = matrix_loader(parcellation=parcellation,min_streamlines_count=min_streamlines_count,mode=mode,distances=ED)
-        SC_matrices.append((f"{dataset_name}_{mode}",SC_W, SC_L,np.log(SC_W)))
+
+        with warnings.catch_warnings(): 
+            warnings.simplefilter('ignore') # supress warnings about zero divide by zero encountered in log
+            SC_matrices.append((f"{dataset_name}_{mode}",SC_W, SC_L,np.log(SC_W)))
     
     return SC_matrices
 
@@ -131,7 +135,9 @@ def load_set_of_schaefer_matrices_for_pytepfit(ED=None,averaging_methods=None,mi
     SC_matrices = []
 
     SC_W_pytep, SC_L_pytep = load_pytepfit_sc()
-    SC_matrices.append(("PyTepFit_simple",SC_W_pytep, SC_L_pytep,np.log(SC_W_pytep)))
+    with warnings.catch_warnings(): 
+        warnings.simplefilter('ignore') # supress warnings about zero divide by zero encountered in log
+        SC_matrices.append(("PyTepFit_simple",SC_W_pytep, SC_L_pytep,np.log(SC_W_pytep)))
 
     SC_W_ENIGMA = load_enigma_sc_matrix(parcellation="schaefer_200",reoreder='PyTepFit')
     SC_matrices.append(("Enigma_dist",np.exp(SC_W_ENIGMA), None,SC_W_ENIGMA,))
