@@ -2,5 +2,5 @@ data/external
 __venv__/
 .ipynb_checkpoints/
 src/__pycache__/
-figures/
+figures/xx_random_old/
 src.egg-info/

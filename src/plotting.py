@@ -321,4 +321,4 @@ def scatter_two_columns_from_dataframe(df,col1,col2,label,log_axes=False,labels=
     if title and fig_dir is not None:
         plt.title(title)
         title_save = (title.replace(" ","_")).replace("\n","_")
-        plt.savefig(path_figures(fig_dir+title_save),bbox_inches='tight',pad_inches=0)
+        plt.savefig(path_figures(fig_dir+title_save+".pdf"),bbox_inches='tight',pad_inches=0)
