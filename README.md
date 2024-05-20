@@ -1,8 +1,12 @@
 # FI thesis: Exploration of network dynamics approaches to description of brain response to stimulation
 
-This repository contains all the codes and data (or description how to dowload them) for thesis *Exploration of network dynamics approaches to description of brain response to stimulation*. 
+This repository contains all the codes and figures for the thesis *Exploration of network dynamics approaches to description of brain response to stimulation*. 
 
 ## Thesis abstract
+
+This thesis explores methodologies rooted in complex network analysis to study both empirical and simulated EEG recordings of brain responses to transcranial magnetic stimulation (TMS). The work is based on recent results showing that network communication models capture some of the relationship between structural connectivity and stimulus response for intracranial data. 
+      
+The thesis first replicates the previous results. Following this, the approach utilizing network communication models is applied to the empirical and simulated TMS-EEG data, comparing the results with each other and with the results obtained for intracranial data. In the end, we perform a robustness analysis regarding the variations in structural connectivity datasets and the methods of group-averaging structural connectivity data.
 
 ## Installation
 
