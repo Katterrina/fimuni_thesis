@@ -76,9 +76,6 @@ mica-mics
 └── ....
 ```
 
-
-
-
 ## Domhof dataset
 
 Availible on EBRAINS: https://doi.org/10.25493/NVS8-XS5 Downloaded parcellations 070-DesikanKilliany.zip as DKT, 100-Schaefer17Networks.zip as Schaefer, 150-Destrieux.zip as Dexterious.
@@ -90,12 +87,23 @@ domhof
 ├── <parcellation>
 │   └── 0ImageProcessing
 │   └── 1StructuralConnectivity
-│	│	└── <xxx>					# subject number
-│	│		└── Counts.csv			#
-│	│		└── Lengths.csv			#
+│	│	└── <subject number XXX>				
+│	│		└── Counts.csv			
+│	│		└── Lengths.csv			
 │   └── 2FunctionalConnectivity
 └── ....
 ```
 
-# Other external resources
+# Other external data
 
+- `schaefer_parcellation_centroids/`
+    - Thomas Yeo lab, https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/MNI/Centroid_coordinates
+- `neuroparc/Glasser_space-MNI152NLin6_res-1x1x1.nii.gz`
+    - Glasser parcellatio in volume https://github.com/neurodata/neuroparc/blob/master/atlases/label/Human/Glasser_space-MNI152NLin6_res-1x1x1.nii.gz
+- `glasser_parcellation_mapping/horn_figshare/HCPMMP1_on_MNI152_ICBM2009a_nlin_hd.nii.gz`
+    - another version of Glasser parcellation in volume https://figshare.com/articles/dataset/HCP-MMP1_0_projected_on_MNI2009a_GM_volumetric_in_NIfTI_format/3501911
+- `glasser_mni_annot/`
+- `glasser_parcellation_centriods/HCP-MMP1_UniqueRegionList.csv`
+    - https://bitbucket.org/dpat/tools/raw/master/REF/ATLASES/HCP-MMP1_UniqueRegionList.csv (found through https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/atlases.html)
+- `glasser_parcellation_mapping/DICE*.txt`
+    - computed using neuroparc toolbox, see https://github.com/neurodata/neuroparc/blob/master/scripts/Dice_Correlation_Tutorial.ipynb
