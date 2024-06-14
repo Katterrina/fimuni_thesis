@@ -1,6 +1,6 @@
 # FI thesis: Exploration of network dynamics approaches to description of brain response to stimulation
 
-This repository contains all the codes and figures for the thesis *Exploration of network dynamics approaches to description of brain response to stimulation*. 
+This repository contains all the codes and figures for the thesis [*Exploration of network dynamics approaches to description of brain response to stimulation*](https://is.muni.cz/th/t08pl/). 
 
 ## Thesis abstract
 
